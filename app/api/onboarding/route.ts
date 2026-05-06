@@ -10,9 +10,20 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
   const body = await req.json();
-  const yearsExperience = parseInt(body.yearsExperience, 10) || 0;
   const experiences: Array<{ company: string; title: string; location: string; start_date: string; end_date: string; raw_keywords: string }> = body.experiences || [];
   const educations: Array<{ school: string; degree: string; field_of_study: string; start_year: string; graduation_year: string }> = body.educations || [];
+
+  // Infer years of experience from earliest job start year. This avoids asking the user redundantly.
+  const currentYear = new Date().getFullYear();
+  const startYears = experiences
+    .map((e) => {
+      const m = (e.start_date || '').match(/(19|20)\d{2}/);
+      return m ? parseInt(m[0], 10) : null;
+    })
+    .filter((y): y is number => y !== null);
+  const yearsExperience = startYears.length > 0
+    ? Math.max(0, currentYear - Math.min(...startYears))
+    : 0;
 
   // Build a brief topAchievements summary from raw keywords for backward compat
   const topAchievements = experiences

@@ -19,7 +19,7 @@ type Profile = {
   career_gap?: string;
 };
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 8;
 
 export default function OnboardingForm({ initial }: { initial: Profile }) {
   const [step, setStep] = useState(0);
@@ -32,7 +32,6 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
   const [contactPhone, setContactPhone] = useState(initial.contact_phone || '');
   const [contactLinkedin, setContactLinkedin] = useState(initial.contact_linkedin || '');
   const [presentRole, setPresentRole] = useState(initial.present_role || '');
-  const [yearsExperience, setYearsExperience] = useState(initial.years_experience?.toString() || '');
   const [targetRole, setTargetRole] = useState(initial.target_role || '');
   const [targetIndustry, setTargetIndustry] = useState(initial.target_industry || '');
   const [careerGap, setCareerGap] = useState(initial.career_gap || '');
@@ -55,7 +54,6 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
         contactPhone,
         contactLinkedin,
         presentRole,
-        yearsExperience,
         targetRole,
         targetIndustry,
         careerGap,
@@ -79,11 +77,10 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
       case 1: return fullName.trim().length > 0;
       case 2: return true; // contact info all optional
       case 3: return presentRole.trim().length > 0;
-      case 4: return yearsExperience.trim().length >= 0;
-      case 5: return true;
-      case 6: return true;
-      case 7: return targetRole.trim().length > 0;
-      case 8: return targetIndustry.trim().length > 0;
+      case 4: return true; // experience optional
+      case 5: return true; // education optional
+      case 6: return targetRole.trim().length > 0;
+      case 7: return targetIndustry.trim().length > 0;
       default: return true;
     }
   }
@@ -103,14 +100,13 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
           />
         )}
         {step === 3 && <PresentRoleStep value={presentRole} onChange={setPresentRole} />}
-        {step === 4 && <YearsStep value={yearsExperience} onChange={setYearsExperience} />}
-        {step === 5 && <ExperienceStep items={experiences} setItems={setExperiences} />}
-        {step === 6 && <EducationStep items={educations} setItems={setEducations} />}
-        {step === 7 && <TargetRoleStep value={targetRole} onChange={setTargetRole} />}
-        {step === 8 && <TargetIndustryStep value={targetIndustry} onChange={setTargetIndustry} />}
-        {step === 9 && (
+        {step === 4 && <ExperienceStep items={experiences} setItems={setExperiences} />}
+        {step === 5 && <EducationStep items={educations} setItems={setEducations} />}
+        {step === 6 && <TargetRoleStep value={targetRole} onChange={setTargetRole} />}
+        {step === 7 && <TargetIndustryStep value={targetIndustry} onChange={setTargetIndustry} />}
+        {step === 8 && (
           <Review
-            data={{ fullName, presentRole, yearsExperience, targetRole, targetIndustry, experiences, educations }}
+            data={{ fullName, presentRole, targetRole, targetIndustry, experiences, educations }}
             onCareerGapChange={setCareerGap}
             careerGap={careerGap}
           />
@@ -271,24 +267,6 @@ function PresentRoleStep({ value, onChange }: { value: string; onChange: (v: str
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="e.g. Senior Consultant at Bain & Company"
-        className="w-full px-4 py-3 text-lg border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
-      />
-    </div>
-  );
-}
-
-function YearsStep({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return (
-    <div>
-      <QuestionHeader ai="How many years of full-time work experience do you have?" hint="Round to the nearest year. Internships don't count." />
-      <input
-        autoFocus
-        type="number"
-        min="0"
-        max="50"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="4"
         className="w-full px-4 py-3 text-lg border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
       />
     </div>
@@ -525,7 +503,7 @@ function Review({
   onCareerGapChange,
 }: {
   data: {
-    fullName: string; presentRole: string; yearsExperience: string;
+    fullName: string; presentRole: string;
     targetRole: string; targetIndustry: string;
     experiences: Experience[]; educations: Education[];
   };
@@ -549,7 +527,6 @@ function Review({
         <p className="font-semibold text-slate-900 mb-2">Quick review:</p>
         <p><span className="text-slate-500">Name:</span> {data.fullName}</p>
         <p><span className="text-slate-500">Now:</span> {data.presentRole}</p>
-        <p><span className="text-slate-500">Years experience:</span> {data.yearsExperience}</p>
         <p><span className="text-slate-500">Jobs added:</span> {data.experiences.length}</p>
         <p><span className="text-slate-500">Degrees added:</span> {data.educations.length}</p>
         <p><span className="text-slate-500">Targeting:</span> {data.targetRole} in {data.targetIndustry}</p>
