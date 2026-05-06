@@ -77,15 +77,35 @@ export async function POST() {
   // - Highlights with no company match become "standalone" entries appended to the most recent role.
   const PROMOTION_RE = /\b(?:promoted to|got promoted to|elevated to|made|stepped up to|advanced to)\s+([A-Z][^.,\n]{2,80}?)(?:\s+(?:at|@|in|with)\s+([^.,\n]+))?[.!]?\s*$/i;
 
+  // Skip-words that aren't distinctive enough to match on
+  const SKIP_WORDS = new Set(['the', 'and', '&', 'company', 'inc', 'corp', 'llc', 'ltd', 'co', 'group', 'holdings', 'a']);
+
   function findMatchingExperience(text: string): typeof baseExperiences[number] | null {
     const lower = text.toLowerCase();
     let best: typeof baseExperiences[number] | null = null;
-    let bestLen = 0;
+    let bestScore = 0;
     for (const e of baseExperiences) {
       const c = (e.company || '').trim().toLowerCase();
-      if (c.length >= 3 && lower.includes(c) && c.length > bestLen) {
+      if (!c) continue;
+
+      // Try whole-name match first
+      if (c.length >= 3 && lower.includes(c)) {
+        if (c.length > bestScore) {
+          best = e;
+          bestScore = c.length;
+        }
+        continue;
+      }
+
+      // Distinctive-word match: split, drop stop-words, check if any appears in the text
+      const words = c.split(/[\s&,.\-]+/).filter((w) => w.length >= 3 && !SKIP_WORDS.has(w));
+      let score = 0;
+      for (const w of words) {
+        if (lower.includes(w)) score += w.length;
+      }
+      if (score > bestScore) {
         best = e;
-        bestLen = c.length;
+        bestScore = score;
       }
     }
     return best;
