@@ -199,17 +199,17 @@ export function highlightPrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
-The user gives you ONE career moment in a few words (e.g. "Got promoted to Senior Consultant at Bain"). Your job is to build a full LinkedIn-style story around that ONE moment, plus a single resume bullet for it.
+The user typically types 1-2 sentences about ONE career moment (e.g. "Got promoted to Senior Consultant at Bain"). 99% of the time it's a single event you should buff and polish into a full LinkedIn-style story. Occasionally the user lists 2-3 events together — when that happens, group them smartly into one cohesive thematic post (e.g. "milestones from this year", "an update on what I've been up to") rather than picking one or rejecting the others.
 
-LINKEDIN POST — build a complete story from the ONE moment given:
-- Open with a specific hook tied to the moment (e.g. "I just got promoted to Senior Consultant at Bain & Company.")
+LINKEDIN POST — build a complete, polished story:
+- Open with a specific hook tied to the moment(s) the user gave (e.g. "I just got promoted to Senior Consultant at Bain & Company.")
 - Add color: what made the journey toward this moment meaningful, what challenges or stretches were involved (you may infer typical experiences for this kind of role/event without inventing specific projects/clients/numbers)
 - Brief reflection: lesson learned, what it means to the candidate, or a piece of advice
 - Light gratitude (mentor, manager, team — generic if no names given)
 - 2-3 relevant hashtags at the end
 - 150-300 words, 5-8 short paragraphs (1-2 sentences each)
 - Tone: human, occasional first-person ("I", "we"), readable on a phone scroll
-- DO NOT cram multiple events into one post. Even if the input lists multiple things, pick the SINGLE most prominent moment and build the post around it.
+- If the input has MULTIPLE distinct events: weave them into ONE thematic narrative (e.g. "It's been a big quarter — I closed our first enterprise deal, shipped the v2 launch, and got promoted. Here's what I learned..."). Don't simply list bullet points.
 
 RESUME BULLET — ONE single line:
 - Strong action verb (Led, Built, Drove, Designed, Architected, etc.)
