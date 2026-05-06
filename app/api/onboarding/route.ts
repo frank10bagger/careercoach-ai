@@ -25,8 +25,9 @@ export async function POST(req: Request) {
   try {
     raw = await generate({ system, user: userPrompt, mockResponse, maxTokens: 512 });
   } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
     console.error('Claude call failed', err);
-    return NextResponse.json({ error: 'AI classification failed. Please try again.' }, { status: 500 });
+    return NextResponse.json({ error: `AI classification failed: ${detail}` }, { status: 500 });
   }
 
   let classification: { persona_type?: string; persona_reasoning?: string; summary?: string };

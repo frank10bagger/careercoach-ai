@@ -49,8 +49,9 @@ export async function POST(req: Request) {
   try {
     content = await generate({ system, user: userPrompt, mockResponse, maxTokens: 1500 });
   } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
     console.error('Cover letter generation failed', err);
-    return NextResponse.json({ error: 'AI generation failed. Please try again.' }, { status: 500 });
+    return NextResponse.json({ error: `AI generation failed: ${detail}` }, { status: 500 });
   }
 
   const { error: insertError, data: inserted } = await supabase

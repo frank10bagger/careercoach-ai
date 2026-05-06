@@ -36,8 +36,9 @@ export async function POST(req: Request) {
   try {
     content = await generate({ system, user: userPrompt, mockResponse, maxTokens: 800 });
   } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
     console.error('Thank-you generation failed', err);
-    return NextResponse.json({ error: 'AI generation failed. Please try again.' }, { status: 500 });
+    return NextResponse.json({ error: `AI generation failed: ${detail}` }, { status: 500 });
   }
 
   const { error: insertError } = await supabase.from('coffee_chats').insert({
