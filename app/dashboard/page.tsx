@@ -92,11 +92,13 @@ export default async function DashboardHome() {
         <RecentList
           title="Recent resumes"
           empty="No resumes yet."
+          href="/dashboard/resume"
           items={resumes.map((r) => ({ label: r.target_role || 'Untitled', sub: new Date(r.created_at).toLocaleDateString() }))}
         />
         <RecentList
           title="Recent applications"
           empty="No applications yet."
+          href="/dashboard/cover-letter"
           items={applications.map((a) => ({ label: `${a.job_title} @ ${a.company}`, sub: new Date(a.created_at).toLocaleDateString() }))}
         />
       </div>
@@ -147,21 +149,36 @@ function StatCard({
 }
 
 function RecentList({
-  title, items, empty,
+  title, items, empty, href,
 }: {
-  title: string; items: { label: string; sub: string }[]; empty: string;
+  title: string;
+  items: { label: string; sub: string }[];
+  empty: string;
+  href: string;
 }) {
   return (
     <div className="p-5 bg-white border border-slate-200 rounded-2xl">
-      <h3 className="font-semibold text-slate-900 mb-3 text-sm">{title}</h3>
+      <div className="flex items-baseline justify-between mb-3">
+        <h3 className="font-semibold text-slate-900 text-sm">{title}</h3>
+        {items.length > 0 && (
+          <Link href={href} className="text-xs text-emerald-700 font-medium hover:underline">
+            View all →
+          </Link>
+        )}
+      </div>
       {items.length === 0 ? (
         <p className="text-sm text-slate-400">{empty}</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {items.slice(0, 5).map((item, i) => (
-            <li key={i} className="flex justify-between text-sm py-1">
-              <span className="text-slate-700 truncate">{item.label}</span>
-              <span className="text-slate-400 text-xs whitespace-nowrap ml-2">{item.sub}</span>
+            <li key={i}>
+              <Link
+                href={href}
+                className="flex justify-between items-center text-sm py-1.5 px-2 -mx-2 rounded-md hover:bg-slate-50 transition group"
+              >
+                <span className="text-slate-700 truncate group-hover:text-slate-900">{item.label}</span>
+                <span className="text-slate-400 text-xs whitespace-nowrap ml-2">{item.sub}</span>
+              </Link>
             </li>
           ))}
         </ul>
