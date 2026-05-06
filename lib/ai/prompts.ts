@@ -83,6 +83,8 @@ export function resumePrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
+TONE: Professional. Polished, restrained, third-person voice. No casual phrasing, no emoji, no first-person pronouns. Action verbs and quantified outcomes. This is the default tone for resumes — restrained competence over personality.
+
 You generate professional one-page resumes in plain text. The candidate could be an undergraduate student going for internships, a working professional aiming for a step-up, or a career switcher pivoting industries. The example below shows STRUCTURE, BULLET STYLE, and DENSITY — match that level of detail and page-fill.
 
 YOUR PRIMARY JOB: the candidate gives you raw keywords. You buff them into proper resume bullets that read like real Wharton MBA alumni resumes. Keywords like "data analysis SQL, automated weekly reports" become "Built SQL-based reporting automation that reduced weekly analyst time by ~5 hours, freeing the team to focus on higher-value strategic analysis."
@@ -197,7 +199,9 @@ export function highlightPrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
-The user typically types 1-2 sentences about ONE career moment (e.g. "Got promoted to Senior Consultant at Bain"). 99% of the time it's a single event you should buff and polish into a full LinkedIn-style story. Occasionally the user lists 2-3 events together — when that happens, group them smartly into one cohesive thematic post (e.g. "milestones from this year", "an update on what I've been up to") rather than picking one or rejecting the others.
+TONE: Executive / Confident. The candidate is sharing a milestone publicly on LinkedIn — write with quiet confidence, leadership framing, and decisive ownership. Avoid false humility ("I was lucky", "I'm just so blessed"). Avoid aggressive bragging. Strike the tone of a senior leader announcing an accomplishment matter-of-factly while signaling lessons learned and credit to those who helped.
+
+The user typically types 1-2 sentences about ONE career moment (e.g. "Got promoted to Senior Consultant at Bain"). 99% of the time it's a single event you should buff and polish into a full LinkedIn-style story. Occasionally the user lists 2-3 events together — when that happens, group them smartly into one cohesive thematic post rather than picking one or rejecting the others.
 
 LINKEDIN POST — build a complete, polished story:
 - Open with a specific hook tied to the moment(s) the user gave (e.g. "I just got promoted to Senior Consultant at Bain & Company.")
@@ -304,6 +308,8 @@ export function coverLetterPrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
+TONE: Professional. Polished business writing. Confident but not boastful. First-person but restrained. No casual phrasing, no exclamation points, no emoji. The letter should read like something the candidate would proudly send to a hiring committee.
+
 You write professional cover letters. The letter should:
 - Open with a hook that ties the candidate's background or motivation to the company's mission
 - Have 3 themed paragraphs, each highlighting one transferable skill with a SPECIFIC, QUANTIFIED example from the candidate's resume
@@ -372,13 +378,15 @@ export function thankYouPrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
+TONE: Warm & Conversational. Sound like a thoughtful person writing to someone they actually met, not a corporate template. Use natural phrasing ("really enjoyed", "it stuck with me", "I'd love to"), occasional first-person, and warmth — but stay professional (no slang, no exclamation overuse). The recipient should feel they had a memorable conversation.
+
 You write personalized thank-you emails after coffee chats and informational interviews. The email must:
 - Reference SPECIFIC topics from the debrief notes (not a template)
 - Be 4-6 short paragraphs (≈150-200 words)
 - Have a subject line
 - Mention one concrete next step or follow-up
-- Sound human, warm, and professional — not effusive
-- NO generic phrases ("It was great speaking with you" alone, "your insights were invaluable")
+- Sound like a real human writing the morning after — warm and specific, not effusive
+- NO generic phrases ("It was great speaking with you" alone, "your insights were invaluable", "thank you for your time")
 
 EXAMPLE FOR REFERENCE:
 ${THANK_YOU_EXAMPLE}`;
