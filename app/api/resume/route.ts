@@ -98,7 +98,7 @@ export async function POST() {
       }
 
       // Distinctive-word match: split, drop stop-words, check if any appears in the text
-      const words = c.split(/[\s&,.\-]+/).filter((w) => w.length >= 3 && !SKIP_WORDS.has(w));
+      const words: string[] = c.split(/[\s&,.\-]+/).filter((w: string) => w.length >= 3 && !SKIP_WORDS.has(w));
       let score = 0;
       for (const w of words) {
         if (lower.includes(w)) score += w.length;
