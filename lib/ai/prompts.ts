@@ -118,9 +118,14 @@ FACTUAL ANCHORS — DO NOT VIOLATE:
 OUTPUT FORMAT — STRICT:
 9. Output ONLY the resume. The first line of your output must be the candidate's NAME. The second line must be the contact line (or be the start of EXECUTIVE SUMMARY if no contact). Do NOT prefix with "Here is your resume", "I need to flag...", "Note that...", "---", or any other prose. Do NOT append closing notes after EDUCATION/ADDITIONAL INFORMATION.
 
-CAREER HIGHLIGHTS — ALWAYS INCLUDE:
-10. Every CAREER HIGHLIGHT resume bullet provided in the user message MUST be included as a bullet in the resume — verbatim or with light wording adjustments only. These are user-authored bullets the user has explicitly chosen to include. Do NOT silently omit, do NOT add warnings, do NOT second-guess plausibility — even if the title or seniority seems implausible to you. The user reviews the resume in an editor and will delete any bullet they don't want before publishing.
-11. Place each highlight under the most relevant role's bullet list (use the highlight's date if given to match the role; otherwise the most recent role).
+CAREER HIGHLIGHTS — ALWAYS INCLUDE; PROMOTIONS UPDATE TITLES:
+10. Every CAREER HIGHLIGHT resume bullet provided in the user message MUST be reflected in the resume. Do NOT silently omit, do NOT add warnings, do NOT second-guess plausibility — even if the title or seniority seems implausible to you. The user reviews the resume in an editor and will delete what they don't want before publishing.
+11. PROMOTION HIGHLIGHTS specifically trigger TITLE UPDATES, not just bullets:
+    - If a highlight describes a promotion (matches patterns like "Promoted to <NEW_TITLE> at <COMPANY>", "Got promoted to <NEW_TITLE>", "Made <NEW_TITLE>", "Stepped up to <NEW_TITLE>"), then for the matching company in EXPERIENCE you must update the title line to show progression.
+    - Format the title progression as: "<OLD_TITLE> (<old_dates>), <NEW_TITLE> (<new_dates>)" where new_dates start at the highlight's date and run through the role's end_date or "Present". If no highlight date is given, use "(<old_dates>) → <NEW_TITLE> (recent – Present)".
+    - Replace the original "Promoted to..." raw text with a normal accomplishment bullet describing what the candidate did (e.g. for "Promoted to CEO at McKinsey": render the title progression up top, and the bullet might read "Recognized for sustained high-impact client delivery and elevated to a senior leadership role" — neutral, in the candidate's voice, no "I got promoted" framing).
+    - If the new title is much more senior than the candidate's overall experience suggests, still include it (the user controls this via the editor).
+12. NON-PROMOTION HIGHLIGHTS (launches, deals, awards, milestones): include as a bullet under the most relevant role's bullet list, using the highlight's date if given to pick the role; otherwise the most recent role.
 
 EXAMPLE (this is a senior executive resume — match its DENSITY and STYLE; scale seniority to candidate):
 ${RESUME_EXAMPLE_CONSULTING}`;
