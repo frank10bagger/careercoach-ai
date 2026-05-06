@@ -35,7 +35,9 @@ export default async function HomePage() {
               <span className="text-slate-900">the digital twin for your career.</span>
             </h1>
             <p className="text-xl text-slate-700 leading-relaxed mb-8">
-              A 5-minute conversation with AI to activate your <span className="font-semibold text-slate-900">AI Career Twin</span>.
+              A 5-minute conversation with AI to activate your
+              <br />
+              <span className="font-semibold text-slate-900">AI Career Twin</span>.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
