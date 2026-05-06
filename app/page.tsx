@@ -34,11 +34,8 @@ export default async function HomePage() {
               <br />
               <span className="text-slate-900">the digital twin for your career.</span>
             </h1>
-            <p className="text-lg text-slate-600 leading-relaxed mb-4">
-              Your fragmented career information — resumes, achievements, goals, applications, coffee chats, interview feedback, networking notes, LinkedIn presence, and milestones — becomes one <span className="font-medium text-slate-900">living memory layer</span>.
-            </p>
-            <p className="text-base text-slate-500 leading-relaxed mb-8">
-              Instead of manually remembering what happened, rewriting the same story, or updating every career asset yourself, CareerTwin captures the important moments and turns them into <span className="font-medium text-slate-700">reusable profile intelligence</span>.
+            <p className="text-xl text-slate-700 leading-relaxed mb-8">
+              A 5-minute conversation with AI to activate your <span className="font-semibold text-slate-900">AI Career Twin</span>.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
