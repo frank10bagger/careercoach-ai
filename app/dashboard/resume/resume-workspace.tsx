@@ -26,8 +26,16 @@ export default function ResumeWorkspace({
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [openVersionId, setOpenVersionId] = useState<string | null>(null);
+  const [versionCopiedId, setVersionCopiedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  function copyVersion(id: string, text: string) {
+    navigator.clipboard.writeText(text);
+    setVersionCopiedId(id);
+    setTimeout(() => setVersionCopiedId(null), 1500);
+  }
 
   function handleCopy() {
     navigator.clipboard.writeText(content);
@@ -196,13 +204,41 @@ export default function ResumeWorkspace({
       {history.length > 0 && (
         <div className="pt-6 border-t border-slate-200 print:hidden">
           <h3 className="font-semibold text-slate-900 mb-2">Version history</h3>
-          <ul className="text-sm text-slate-600 space-y-1">
-            {history.map((r) => (
-              <li key={r.id} className="flex justify-between">
-                <span>v{r.version} — {r.target_role || 'untitled'}</span>
-                <span className="text-slate-400">{new Date(r.created_at).toLocaleString()}</span>
-              </li>
-            ))}
+          <p className="text-xs text-slate-500 mb-3">Click any past version to view it (read-only).</p>
+          <ul className="space-y-2">
+            {history.map((r) => {
+              const isOpen = openVersionId === r.id;
+              return (
+                <li key={r.id} className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setOpenVersionId(isOpen ? null : r.id)}
+                    className="w-full p-3 flex justify-between items-center text-sm hover:bg-slate-50 transition text-left"
+                  >
+                    <span className="text-slate-700 flex items-center gap-2">
+                      <span className={`text-slate-400 transition-transform ${isOpen ? 'rotate-90' : ''}`}>›</span>
+                      v{r.version} — {r.target_role || 'Untitled'}
+                    </span>
+                    <span className="text-slate-400 text-xs">{new Date(r.created_at).toLocaleString()}</span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 border-t border-slate-100 bg-slate-50/50">
+                      <div className="flex justify-between items-center mt-3 mb-2">
+                        <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">Saved resume (read-only)</p>
+                        <button
+                          onClick={() => copyVersion(r.id, r.content_text)}
+                          className="text-xs text-emerald-700 hover:underline"
+                        >
+                          {versionCopiedId === r.id ? 'Copied!' : 'Copy text'}
+                        </button>
+                      </div>
+                      <pre className="p-3 bg-white border border-slate-200 rounded text-xs leading-relaxed font-mono whitespace-pre-wrap max-h-96 overflow-y-auto">
+                        {r.content_text}
+                      </pre>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
