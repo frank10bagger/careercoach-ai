@@ -57,6 +57,11 @@ export default function ThankYouWorkspace({ chats }: { chats: Chat[] }) {
 
   return (
     <div className="space-y-8">
+      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex gap-2">
+        <span aria-hidden>⚠️</span>
+        <span><strong>AI-generated content.</strong> Audit before sending — make sure the email accurately reflects what you actually discussed.</span>
+      </div>
+
       <form onSubmit={handleGenerate} className="bg-white p-6 rounded-xl border border-slate-200 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>

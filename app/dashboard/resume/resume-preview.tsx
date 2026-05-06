@@ -25,14 +25,12 @@ function classify(line: string) {
 
 const TEXT = '#1a1a1a';
 const MUTED = '#555555';
-const BORDER = '#cccccc';
+const SECTION_BORDER = '#999999';
 
 export default function ResumePreview({ content }: { content: string }) {
   const lines = content.split('\n');
   const name = (lines[0] || '').trim();
   const possibleContact = (lines[1] || '').trim();
-  // Heuristic: if line 2 contains @, digits, or 'linkedin', it's a contact line.
-  // Otherwise it's the start of the body (no contact provided).
   const hasContactSignal = /[@]/.test(possibleContact)
     || /\d{3,}/.test(possibleContact)
     || /linkedin/i.test(possibleContact);
@@ -45,24 +43,21 @@ export default function ResumePreview({ content }: { content: string }) {
       style={{
         background: '#ffffff',
         color: TEXT,
-        padding: '40px 48px',
-        border: `1px solid ${BORDER}`,
-        borderRadius: 8,
-        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        padding: '56px 64px',
         fontFamily: '"Calibri", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-        fontSize: 13,
-        lineHeight: 1.45,
-        maxWidth: 800,
+        fontSize: 14.5,
+        lineHeight: 1.5,
+        maxWidth: 850,
         margin: '0 auto',
       }}
     >
       {name && (
-        <h1 style={{ fontSize: 28, fontWeight: 700, textAlign: 'center', margin: '0 0 4px 0', color: TEXT }}>
+        <h1 style={{ fontSize: 32, fontWeight: 700, textAlign: 'center', margin: '0 0 6px 0', color: TEXT, letterSpacing: '0.5px' }}>
           {name}
         </h1>
       )}
       {contact && (
-        <p style={{ fontSize: 12, color: MUTED, textAlign: 'center', margin: '0 0 20px 0' }}>{contact}</p>
+        <p style={{ fontSize: 13, color: MUTED, textAlign: 'center', margin: '0 0 24px 0' }}>{contact}</p>
       )}
 
       <div>
@@ -73,14 +68,14 @@ export default function ResumePreview({ content }: { content: string }) {
               <h2
                 key={i}
                 style={{
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: 700,
                   textTransform: 'uppercase',
-                  letterSpacing: 1.2,
+                  letterSpacing: 1.4,
                   color: TEXT,
-                  margin: '14px 0 6px 0',
-                  paddingBottom: 3,
-                  borderBottom: `1px solid ${BORDER}`,
+                  margin: '20px 0 10px 0',
+                  paddingBottom: 5,
+                  borderBottom: `1px solid ${SECTION_BORDER}`,
                 }}
               >
                 {b.text}
@@ -96,7 +91,7 @@ export default function ResumePreview({ content }: { content: string }) {
                   display: 'flex',
                   justifyContent: 'space-between',
                   gap: 16,
-                  margin: '2px 0',
+                  margin: '4px 0',
                 }}
               >
                 <span style={{ fontWeight: looksLikeCompany ? 700 : 400, color: TEXT }}>{b.left}</span>
@@ -106,13 +101,13 @@ export default function ResumePreview({ content }: { content: string }) {
           }
           if (b.type === 'bullet') {
             return (
-              <div key={i} style={{ display: 'flex', gap: 8, marginLeft: 12, margin: '3px 0 3px 12px' }}>
-                <span style={{ color: MUTED, marginTop: 2 }}>•</span>
+              <div key={i} style={{ display: 'flex', gap: 10, marginLeft: 14, margin: '5px 0 5px 14px' }}>
+                <span style={{ color: MUTED, marginTop: 1 }}>•</span>
                 <span style={{ flex: 1, color: TEXT }}>{b.text}</span>
               </div>
             );
           }
-          return <p key={i} style={{ margin: '3px 0', color: TEXT }}>{b.text}</p>;
+          return <p key={i} style={{ margin: '5px 0', color: TEXT }}>{b.text}</p>;
         })}
       </div>
     </div>

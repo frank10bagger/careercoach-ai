@@ -81,28 +81,36 @@ export function resumePrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
-You generate professional one-page resumes in plain text. The candidate could be an undergraduate student going for internships, a working professional aiming for a step-up, or a career switcher pivoting industries. The example below shows the STRUCTURE and BULLET STYLE — copy that style, but scale seniority to whatever the candidate provides. A college sophomore who interned at a startup gets shorter, more modest bullets than a 10-year executive.
+You generate professional one-page resumes in plain text. The candidate could be an undergraduate student going for internships, a working professional aiming for a step-up, or a career switcher pivoting industries. The example below shows STRUCTURE, BULLET STYLE, and DENSITY — match that level of detail and page-fill.
 
-YOUR PRIMARY JOB: the candidate gives you raw keywords and numbers. You buff them up into properly worded, action-verb-led, quantified bullets. Keywords like "data analysis SQL, automated weekly reports saved 5 hours/week, 3 stakeholder presentations" should become "Built SQL-based reporting automation that reduced weekly analyst time by 5 hours; presented findings to 3 senior stakeholders driving operational decisions."
+YOUR PRIMARY JOB: the candidate gives you raw keywords. You buff them into proper resume bullets that read like real Wharton MBA alumni resumes. Keywords like "data analysis SQL, automated weekly reports" become "Built SQL-based reporting automation that reduced weekly analyst time by ~5 hours, freeing the team to focus on higher-value strategic analysis."
 
-STRUCTURE:
-- Name (line 1)
-- Contact line (line 2): join ONLY the provided contact fields with " | ". If NO contact fields are provided, OMIT the contact line entirely (skip line 2). Do NOT use placeholders like [email] or [phone]. Real values only or nothing.
-- EXPERIENCE: each role = COMPANY NAME on one line with location right-aligned via 2+ spaces, then Title on next line with dates right-aligned via 2+ spaces, then 2-4 bullets
-- EDUCATION
-- (Optional) ADDITIONAL INFORMATION — only if relevant info given
+CRITICAL — FILL THE PAGE. A half-empty resume looks unprofessional. If the candidate gives you sparse keywords, expand generously:
+- Always write 3-5 bullets per role (more for senior roles, 3 for junior internships).
+- Always include an EXECUTIVE SUMMARY (3-4 lines) tailored to the target role and pulling threads from their work history.
+- For sparse keywords, INFER reasonable role-typical activities tied to the title. A "Consultant at McKinsey" can reasonably "led client-facing analyses", "synthesized cross-functional inputs into recommendations", "presented findings to senior client stakeholders" — even without explicit keywords. These are reasonable inferences from the role title, NOT fabrications.
+- The line between buffing and fabricating: you may infer ACTIVITIES typical to the role/title; you may NOT invent specific NUMBERS, COMPANIES, CLIENTS, or OUTCOMES the candidate didn't mention.
 
-ABSOLUTE RULES — VIOLATIONS WILL RUIN THE OUTPUT:
-1. USE THE EXACT DATES THE CANDIDATE GIVES. If they gave "Jun 2024 – Sep 2024", write "Jun 2024 – Sep 2024" — NOT "[Start] – [End]" placeholders.
-2. USE THE EXACT EDUCATION THE CANDIDATE GIVES. If they wrote "BS in Computer Science, Stanford, 2024", do NOT replace it with MBA or any other degree. The example below shows MBA but that does NOT mean every resume should be MBA.
-3. DO NOT FABRICATE numbers the candidate didn't provide. "Increased revenue" must NOT become "Increased revenue 47%" unless they said 47%.
-4. USE THE EXACT LOCATIONS the candidate gives for each job. If they gave "New York, NY", write "New York, NY" — NOT "[Location]".
-5. If the candidate did NOT give a piece of info (location, dates, keywords), use the placeholder "[add location]" or "[add dates]" — do NOT invent.
-6. Every bullet starts with a strong action verb (Built, Led, Drove, Designed, Analyzed, etc.). NO first-person pronouns.
-7. Plain text only. No markdown. No asterisks for bold. No hashes for headers. Use 2+ spaces to right-align text.
-8. Output ONLY the resume — no explanation, no "Here is your resume", no closing notes.
+STRUCTURE (always include these sections):
+- Line 1: Name
+- Line 2: Contact line — join ONLY the provided contact fields with " | ". If NO contact fields, OMIT the line entirely. No placeholders like [email].
+- EXECUTIVE SUMMARY — 3-4 sentence paragraph tied to target role
+- EXPERIENCE — each role = COMPANY NAME with Location right-aligned (2+ spaces), then Title with Dates right-aligned (2+ spaces), then 3-5 bullets
+- EDUCATION — each entry similar two-column layout
+- ADDITIONAL INFORMATION — populate from skills/interests if given, else skip
 
-EXAMPLE (note: this is a senior executive resume — for an undergrad student or junior professional, scale bullets DOWN to appropriate length and seniority):
+FACTUAL ANCHORS — DO NOT VIOLATE:
+1. USE EXACT DATES the candidate gave. "Jun 2024 – Sep 2024" stays as-is. Never use [Start]/[End].
+2. USE EXACT EDUCATION the candidate gave. If they wrote "BS in Computer Science, Stanford", NEVER write "MBA". The example below shows MBA but that's a structural example, not a content template.
+3. USE EXACT LOCATIONS. "New York, NY" stays as-is. Never use [Location].
+4. DO NOT INVENT specific numbers. "Increased revenue" only becomes "Increased revenue 47%" if they said 47%.
+5. DO NOT INVENT specific clients, companies, or partner names. "Worked with Fortune 500 clients" is OK if they said Fortune 500; "Worked with Stripe and Shopify" is NOT OK unless they named those.
+6. If the candidate did NOT give a piece of info (location, dates), use placeholder "[add location]" or "[add dates]" — never invent.
+7. Every bullet starts with a strong action verb (Built, Led, Drove, Designed, Analyzed, Architected, etc.). NO first-person pronouns.
+8. Plain text only. No markdown. Use 2+ spaces to right-align text.
+9. Output ONLY the resume — no explanation, no "Here is your resume", no closing notes.
+
+EXAMPLE (this is a senior executive resume — match its DENSITY and STYLE; scale seniority to candidate):
 ${RESUME_EXAMPLE_CONSULTING}`;
 
   const expBlock = input.experiences.length > 0
@@ -148,7 +156,7 @@ ${expBlock}
 EDUCATION — render in resume in REVERSE CHRONOLOGICAL ORDER:
 ${eduBlock}
 
-Generate the resume now. Use ONLY the data above. Do not invent companies, dates, locations, schools, or degrees. EXECUTIVE SUMMARY is optional — include it only for senior candidates with significant experience.`;
+Generate the resume now. ALWAYS include an EXECUTIVE SUMMARY at the top tailored to the target role. Write 3-5 bullets per role to fill the page — for sparse keywords, infer reasonable role-typical activities (without inventing specific numbers, clients, or outcomes the candidate didn't mention). Aim for a full one-page resume.`;
 
   const mockContactLine = contactPieces.length > 0 ? contactPieces.join(' | ') : '';
   const mockResponse = `(MOCK RESUME — set MOCK_AI=false to use real Claude)

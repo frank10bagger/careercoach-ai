@@ -56,6 +56,11 @@ export default function CoverLetterWorkspace({
 
   return (
     <div className="space-y-8">
+      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex gap-2">
+        <span aria-hidden>⚠️</span>
+        <span><strong>AI-generated content.</strong> Audit every paragraph before sending — verify the AI didn&apos;t over-claim experience or misread the job description.</span>
+      </div>
+
       <form onSubmit={handleGenerate} className="bg-white p-6 rounded-xl border border-slate-200 space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Company</label>

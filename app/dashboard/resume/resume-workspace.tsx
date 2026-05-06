@@ -50,22 +50,29 @@ export default function ResumeWorkspace({
       import('html2canvas'),
       import('jspdf'),
     ]);
-    const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' });
+    const canvas = await html2canvas(element, {
+      scale: 3,                  // 3x for retina-sharp
+      backgroundColor: '#ffffff',
+      useCORS: true,
+      logging: false,
+      windowWidth: element.scrollWidth,
+    });
+    // PNG keeps text crisp (vs JPEG compression artifacts on small fonts)
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter', compress: true });
     const pageWidth = 8.5;
     const pageHeight = 11;
-    const margin = 0.5;
+    const margin = 0;            // resume already has internal padding; no extra margin
     const usableWidth = pageWidth - 2 * margin;
     const imgHeight = (canvas.height * usableWidth) / canvas.width;
     let heightLeft = imgHeight;
     let position = margin;
-    pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, imgHeight);
+    pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight, undefined, 'FAST');
     heightLeft -= pageHeight - 2 * margin;
     while (heightLeft > 0) {
       position = -(imgHeight - heightLeft) + margin;
       pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight, undefined, 'FAST');
       heightLeft -= pageHeight - 2 * margin;
     }
     pdf.save(`resume-${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -107,6 +114,11 @@ export default function ResumeWorkspace({
 
   return (
     <div className="space-y-6">
+      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex gap-2 print:hidden">
+        <span aria-hidden>⚠️</span>
+        <span><strong>AI-generated content.</strong> Audit every line before you click Publish — Claude can phrase things imperfectly or interpret your keywords differently than you intended.</span>
+      </div>
+
       <div className="flex flex-wrap gap-3 print:hidden">
         <button
           onClick={handleGenerate}
