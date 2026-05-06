@@ -38,6 +38,9 @@ export async function POST() {
 
   const { system, user: userPrompt, mockResponse } = resumePrompt({
     fullName: profile.full_name || 'Candidate Name',
+    contactEmail: profile.contact_email || '',
+    contactPhone: profile.contact_phone || '',
+    contactLinkedin: profile.contact_linkedin || '',
     presentRole: profile.present_role || '',
     yearsExperience: profile.years_experience || 0,
     targetRole: profile.target_role || '',

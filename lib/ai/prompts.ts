@@ -67,6 +67,9 @@ type EducationInput = { school: string; degree: string; field_of_study: string; 
 
 export function resumePrompt(input: {
   fullName: string;
+  contactEmail: string;
+  contactPhone: string;
+  contactLinkedin: string;
   presentRole: string;
   yearsExperience: number;
   targetRole: string;
@@ -83,7 +86,8 @@ You generate professional one-page resumes in plain text for undergraduate stude
 YOUR PRIMARY JOB: the candidate gives you raw keywords and numbers. You buff them up into properly worded, action-verb-led, quantified bullets. Keywords like "data analysis SQL, automated weekly reports saved 5 hours/week, 3 stakeholder presentations" should become "Built SQL-based reporting automation that reduced weekly analyst time by 5 hours; presented findings to 3 senior stakeholders driving operational decisions."
 
 STRUCTURE:
-- Name (line 1), contact line (line 2, use placeholders [email] / [phone] / linkedin.com/in/[handle] if not provided)
+- Name (line 1)
+- Contact line (line 2): join ONLY the provided contact fields with " | ". If NO contact fields are provided, OMIT the contact line entirely (skip line 2). Do NOT use placeholders like [email] or [phone]. Real values only or nothing.
 - EXPERIENCE: each role = COMPANY NAME on one line with location right-aligned via 2+ spaces, then Title on next line with dates right-aligned via 2+ spaces, then 2-4 bullets
 - EDUCATION
 - (Optional) ADDITIONAL INFORMATION — only if relevant info given
@@ -125,8 +129,14 @@ ${RESUME_EXAMPLE_CONSULTING}`;
         .join('\n')
     : `(No education captured. Write a single placeholder line: "[School]                                              [Location]\\n[Degree]                                              [Year]")`;
 
+  const contactPieces = [input.contactEmail, input.contactPhone, input.contactLinkedin].filter((s) => s && s.trim());
+  const contactLine = contactPieces.length > 0
+    ? `Provided contact pieces (join with " | " on line 2): ${contactPieces.join(' | ')}`
+    : 'No contact info provided. OMIT the contact line entirely — do not write any placeholder.';
+
   const user = `CANDIDATE
 Name: ${input.fullName}
+${contactLine}
 Today's role: ${input.presentRole}
 Total years of experience: ${input.yearsExperience}
 Target role: ${input.targetRole}
@@ -140,10 +150,10 @@ ${eduBlock}
 
 Generate the resume now. Use ONLY the data above. Do not invent companies, dates, locations, schools, or degrees. Do not include an EXECUTIVE SUMMARY for an undergraduate; it's optional for senior candidates only.`;
 
+  const mockContactLine = contactPieces.length > 0 ? contactPieces.join(' | ') : '';
   const mockResponse = `(MOCK RESUME — set MOCK_AI=false to use real Claude)
 
-${input.fullName.toUpperCase()}
-[email] | [phone] | linkedin.com/in/[handle]
+${input.fullName.toUpperCase()}${mockContactLine ? '\n' + mockContactLine : ''}
 
 EXPERIENCE
 ${input.experiences.map((e) => `${e.company.toUpperCase()}                                                          ${e.location || '[add location]'}\n${e.title}                                                                  ${e.start_date || '?'} – ${e.end_date || 'Present'}\n- (Buffed bullet from: ${e.raw_keywords || 'no keywords given'})\n`).join('\n')}

@@ -8,6 +8,9 @@ type Education = { school: string; degree: string; field_of_study: string; start
 
 type Profile = {
   full_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  contact_linkedin?: string;
   present_role?: string;
   years_experience?: number;
   target_role?: string;
@@ -16,7 +19,7 @@ type Profile = {
   career_gap?: string;
 };
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 export default function OnboardingForm({ initial }: { initial: Profile }) {
   const [step, setStep] = useState(0);
@@ -25,6 +28,9 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
   const router = useRouter();
 
   const [fullName, setFullName] = useState(initial.full_name || '');
+  const [contactEmail, setContactEmail] = useState(initial.contact_email || '');
+  const [contactPhone, setContactPhone] = useState(initial.contact_phone || '');
+  const [contactLinkedin, setContactLinkedin] = useState(initial.contact_linkedin || '');
   const [presentRole, setPresentRole] = useState(initial.present_role || '');
   const [yearsExperience, setYearsExperience] = useState(initial.years_experience?.toString() || '');
   const [targetRole, setTargetRole] = useState(initial.target_role || '');
@@ -45,6 +51,9 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         fullName,
+        contactEmail,
+        contactPhone,
+        contactLinkedin,
         presentRole,
         yearsExperience,
         targetRole,
@@ -68,12 +77,13 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
     switch (step) {
       case 0: return true;
       case 1: return fullName.trim().length > 0;
-      case 2: return presentRole.trim().length > 0;
-      case 3: return yearsExperience.trim().length >= 0; // 0 is valid for student
-      case 4: return true;
+      case 2: return true; // contact info all optional
+      case 3: return presentRole.trim().length > 0;
+      case 4: return yearsExperience.trim().length >= 0;
       case 5: return true;
-      case 6: return targetRole.trim().length > 0;
-      case 7: return targetIndustry.trim().length > 0;
+      case 6: return true;
+      case 7: return targetRole.trim().length > 0;
+      case 8: return targetIndustry.trim().length > 0;
       default: return true;
     }
   }
@@ -85,13 +95,20 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
       <div className="min-h-[280px] mt-6">
         {step === 0 && <Welcome />}
         {step === 1 && <NameStep value={fullName} onChange={setFullName} />}
-        {step === 2 && <PresentRoleStep value={presentRole} onChange={setPresentRole} />}
-        {step === 3 && <YearsStep value={yearsExperience} onChange={setYearsExperience} />}
-        {step === 4 && <ExperienceStep items={experiences} setItems={setExperiences} />}
-        {step === 5 && <EducationStep items={educations} setItems={setEducations} />}
-        {step === 6 && <TargetRoleStep value={targetRole} onChange={setTargetRole} />}
-        {step === 7 && <TargetIndustryStep value={targetIndustry} onChange={setTargetIndustry} />}
-        {step === 8 && (
+        {step === 2 && (
+          <ContactStep
+            email={contactEmail} onEmail={setContactEmail}
+            phone={contactPhone} onPhone={setContactPhone}
+            linkedin={contactLinkedin} onLinkedin={setContactLinkedin}
+          />
+        )}
+        {step === 3 && <PresentRoleStep value={presentRole} onChange={setPresentRole} />}
+        {step === 4 && <YearsStep value={yearsExperience} onChange={setYearsExperience} />}
+        {step === 5 && <ExperienceStep items={experiences} setItems={setExperiences} />}
+        {step === 6 && <EducationStep items={educations} setItems={setEducations} />}
+        {step === 7 && <TargetRoleStep value={targetRole} onChange={setTargetRole} />}
+        {step === 8 && <TargetIndustryStep value={targetIndustry} onChange={setTargetIndustry} />}
+        {step === 9 && (
           <Review
             data={{ fullName, presentRole, yearsExperience, targetRole, targetIndustry, experiences, educations }}
             onCareerGapChange={setCareerGap}
@@ -175,6 +192,55 @@ function Welcome() {
       <p className="text-slate-600 leading-relaxed">
         For your work and education, just give me <span className="font-medium text-slate-900">keywords and numbers</span>. I&apos;ll do the heavy lifting and turn them into proper resume bullets when you generate your resume.
       </p>
+    </div>
+  );
+}
+
+function ContactStep({
+  email, onEmail, phone, onPhone, linkedin, onLinkedin,
+}: {
+  email: string; onEmail: (v: string) => void;
+  phone: string; onPhone: (v: string) => void;
+  linkedin: string; onLinkedin: (v: string) => void;
+}) {
+  return (
+    <div>
+      <QuestionHeader
+        ai="What contact info should appear on your resume?"
+        hint="All optional. Whatever you leave blank we'll just omit — no [placeholder] in your resume."
+      />
+      <div className="space-y-3">
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">Email (optional)</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => onEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">Phone (optional)</label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => onPhone(e.target.value)}
+            placeholder="+1 (555) 123-4567"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">LinkedIn (optional)</label>
+          <input
+            type="text"
+            value={linkedin}
+            onChange={(e) => onLinkedin(e.target.value)}
+            placeholder="linkedin.com/in/yourhandle"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+      </div>
     </div>
   );
 }

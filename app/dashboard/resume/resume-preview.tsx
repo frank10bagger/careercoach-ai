@@ -30,8 +30,14 @@ const BORDER = '#cccccc';
 export default function ResumePreview({ content }: { content: string }) {
   const lines = content.split('\n');
   const name = (lines[0] || '').trim();
-  const contact = (lines[1] || '').trim();
-  const body = lines.slice(2).map(classify);
+  const possibleContact = (lines[1] || '').trim();
+  // Heuristic: if line 2 contains @, digits, or 'linkedin', it's a contact line.
+  // Otherwise it's the start of the body (no contact provided).
+  const hasContactSignal = /[@]/.test(possibleContact)
+    || /\d{3,}/.test(possibleContact)
+    || /linkedin/i.test(possibleContact);
+  const contact = hasContactSignal ? possibleContact : '';
+  const body = (hasContactSignal ? lines.slice(2) : lines.slice(1)).map(classify);
 
   return (
     <div

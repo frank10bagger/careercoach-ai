@@ -9,6 +9,9 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
   full_name text,
+  contact_email text,
+  contact_phone text,
+  contact_linkedin text,
   present_role text,
   years_experience integer,
   target_role text,
@@ -20,6 +23,10 @@ create table if not exists public.profiles (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+alter table public.profiles add column if not exists contact_email text;
+alter table public.profiles add column if not exists contact_phone text;
+alter table public.profiles add column if not exists contact_linkedin text;
 
 -- =========================================================================
 -- 2. EXPERIENCES — work history (one row per job)

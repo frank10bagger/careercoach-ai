@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
   let raw: string;
   try {
-    raw = await generate({ system, user: userPrompt, mockResponse, maxTokens: 512 });
+    raw = await generate({ system, user: userPrompt, mockResponse, maxTokens: 512, temperature: 0.1 });
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
     console.error('Claude call failed', err);
@@ -55,6 +55,9 @@ export async function POST(req: Request) {
     .from('profiles')
     .update({
       full_name: body.fullName,
+      contact_email: body.contactEmail || null,
+      contact_phone: body.contactPhone || null,
+      contact_linkedin: body.contactLinkedin || null,
       present_role: body.presentRole,
       years_experience: yearsExperience,
       target_role: body.targetRole,

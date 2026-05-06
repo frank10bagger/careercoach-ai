@@ -19,6 +19,7 @@ export async function generate(opts: {
   system: string;
   user: string;
   maxTokens?: number;
+  temperature?: number;
   mockResponse: string;
 }): Promise<string> {
   if (isMock()) {
@@ -33,6 +34,7 @@ export async function generate(opts: {
       const message = await client.messages.create({
         model: MODEL,
         max_tokens: opts.maxTokens ?? 2048,
+        temperature: opts.temperature ?? 1.0,
         system: opts.system,
         messages: [{ role: 'user', content: opts.user }],
       });
