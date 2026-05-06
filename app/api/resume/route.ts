@@ -62,7 +62,7 @@ export async function POST() {
       resume_bullet: h.resume_bullet || '',
       highlight_date: h.highlight_date || '',
     }));
-  const baseExperiences = (expRes.data ?? []).map((e) => ({
+  const experiences = (expRes.data ?? []).map((e) => ({
     company: e.company || '',
     title: e.title || '',
     location: e.location || '',
@@ -72,66 +72,48 @@ export async function POST() {
   }));
 
   // Merge highlights into the matching experience.
-  // - If a highlight mentions a company name, append its bullet to that role's keywords.
-  // - If it's a promotion ("Promoted to X at Y"), update that role's title to show progression.
-  // - Highlights with no company match become "standalone" entries appended to the most recent role.
   const PROMOTION_RE = /\b(?:promoted to|got promoted to|elevated to|made|stepped up to|advanced to)\s+([A-Z][^.,\n]{2,80}?)(?:\s+(?:at|@|in|with)\s+([^.,\n]+))?[.!]?\s*$/i;
-
-  // Skip-words that aren't distinctive enough to match on
   const SKIP_WORDS = new Set(['the', 'and', '&', 'company', 'inc', 'corp', 'llc', 'ltd', 'co', 'group', 'holdings', 'a']);
 
-  function findMatchingExperience(text: string): typeof baseExperiences[number] | null {
+  function findMatchingIndex(text: string): number {
     const lower = text.toLowerCase();
-    let best: typeof baseExperiences[number] | null = null;
+    let bestIdx = -1;
     let bestScore = 0;
-    for (const e of baseExperiences) {
+    experiences.forEach((e, i) => {
       const c = (e.company || '').trim().toLowerCase();
-      if (!c) continue;
-
-      // Try whole-name match first
+      if (!c) return;
+      // Whole-name match
       if (c.length >= 3 && lower.includes(c)) {
-        if (c.length > bestScore) {
-          best = e;
-          bestScore = c.length;
-        }
-        continue;
+        if (c.length > bestScore) { bestIdx = i; bestScore = c.length; }
+        return;
       }
-
-      // Distinctive-word match: split, drop stop-words, check if any appears in the text
+      // Distinctive-word match
       const words: string[] = c.split(/[\s&,.\-]+/).filter((w: string) => w.length >= 3 && !SKIP_WORDS.has(w));
       let score = 0;
       for (const w of words) {
         if (lower.includes(w)) score += w.length;
       }
-      if (score > bestScore) {
-        best = e;
-        bestScore = score;
-      }
-    }
-    return best;
+      if (score > bestScore) { bestIdx = i; bestScore = score; }
+    });
+    return bestIdx;
   }
 
   const standaloneHighlights: string[] = [];
-  const experiences = baseExperiences.map((e) => ({ ...e })); // mutable copy
 
   for (const h of rawHighlights) {
-    const matched = findMatchingExperience(h.raw_description);
-    if (matched) {
-      const idx = experiences.indexOf(experiences.find((x) => x === matched)!);
-      const target = idx >= 0 ? experiences[idx] : null;
-      if (target) {
-        // Append resume_bullet text as an additional keyword line so the prompt naturally includes it
-        target.raw_keywords = [target.raw_keywords, h.resume_bullet].filter(Boolean).join('\n');
+    const idx = findMatchingIndex(h.raw_description);
+    if (idx >= 0) {
+      const target = experiences[idx];
+      // Append resume_bullet so prompt picks it up as a keyword line
+      target.raw_keywords = [target.raw_keywords, h.resume_bullet].filter(Boolean).join('\n');
 
-        // If it's a promotion, update title to show progression
-        const promoMatch = h.raw_description.match(PROMOTION_RE);
-        if (promoMatch) {
-          const newTitle = promoMatch[1].trim();
-          const promotedDate = h.highlight_date || 'recent';
-          const oldTitle = target.title || 'role';
-          if (!target.title.toLowerCase().includes(newTitle.toLowerCase())) {
-            target.title = `${oldTitle} (${target.start_date || '?'} – ${promotedDate}), ${newTitle} (${promotedDate} – ${target.end_date || 'Present'})`;
-          }
+      const promoMatch = h.raw_description.match(PROMOTION_RE);
+      if (promoMatch) {
+        const newTitle = promoMatch[1].trim();
+        const promotedDate = h.highlight_date || 'recent';
+        const oldTitle = target.title || 'role';
+        if (!oldTitle.toLowerCase().includes(newTitle.toLowerCase())) {
+          target.title = `${oldTitle} (${target.start_date || '?'} – ${promotedDate}), ${newTitle} (${promotedDate} – ${target.end_date || 'Present'})`;
         }
       }
     } else {
@@ -139,7 +121,6 @@ export async function POST() {
     }
   }
 
-  // Standalone highlights → tack on to most recent role's keywords
   if (standaloneHighlights.length > 0 && experiences.length > 0) {
     experiences[0].raw_keywords = [experiences[0].raw_keywords, ...standaloneHighlights].filter(Boolean).join('\n');
   }
