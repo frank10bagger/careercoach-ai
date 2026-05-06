@@ -1,4 +1,4 @@
-# CareerCoach AI — Group 6 Presentation
+# CareerTwin — Group 6 Presentation
 
 **Format:** 8 min talk + 4 min Q&A · End of class · OIDD 6670 Session 3 · 2026-05-07
 
@@ -9,7 +9,7 @@
 
 ## Slide 1 — User Guide (REQUIRED FIRST SLIDE)
 
-### CareerCoach AI
+### CareerTwin
 
 > Your AI career mentor for undergrads — from self-discovery to signed offer.
 

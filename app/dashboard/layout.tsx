@@ -30,9 +30,9 @@ export default async function DashboardLayout({
         <Link href="/dashboard" className="block mb-8 group">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-bold shadow-sm group-hover:shadow-md transition-shadow">
-              C
+              CT
             </div>
-            <h1 className="text-lg font-bold text-slate-900 tracking-tight">CareerCoach AI</h1>
+            <h1 className="text-lg font-bold text-slate-900 tracking-tight">CareerTwin</h1>
           </div>
         </Link>
 

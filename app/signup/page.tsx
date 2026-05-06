@@ -41,10 +41,10 @@ export default function SignupPage() {
 
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-100 p-8 relative z-10 fade-in">
         <Link href="/" className="flex items-center gap-2 mb-8 group">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-base font-bold shadow-md group-hover:shadow-lg transition-shadow">
-            C
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-sm font-bold shadow-md group-hover:shadow-lg transition-shadow">
+            CT
           </div>
-          <span className="font-bold text-slate-900 text-lg tracking-tight">CareerCoach AI</span>
+          <span className="font-bold text-slate-900 text-lg tracking-tight">CareerTwin</span>
         </Link>
 
         <h1 className="text-2xl font-bold text-slate-900 mb-1">Create your account</h1>

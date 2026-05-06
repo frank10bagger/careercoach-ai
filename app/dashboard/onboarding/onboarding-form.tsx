@@ -243,9 +243,9 @@ function QuestionHeader({ ai, hint }: { ai: string; hint?: string }) {
     <div className="mb-5">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-          AI
+          CT
         </div>
-        <p className="text-xs font-medium text-emerald-700 tracking-wide">CAREERCOACH</p>
+        <p className="text-xs font-medium text-emerald-700 tracking-wide">CAREERTWIN</p>
       </div>
       <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 leading-snug">{ai}</h2>
       {hint && <p className="text-sm text-slate-500 mt-2">{hint}</p>}
@@ -258,18 +258,18 @@ function Welcome() {
     <div>
       <div className="flex items-center gap-2 mb-4">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-          AI
+          CT
         </div>
-        <p className="text-xs font-medium text-emerald-700 tracking-wide">CAREERCOACH</p>
+        <p className="text-xs font-medium text-emerald-700 tracking-wide">CAREERTWIN</p>
       </div>
       <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 leading-snug mb-4">
-        Hi 👋 I&apos;m your AI career coach.
+        Hi 👋 Let&apos;s build your digital twin.
       </h2>
       <p className="text-slate-600 leading-relaxed mb-3">
-        Built for undergraduate students, working professionals, and career switchers. I&apos;ll ask a few questions about your background and where you want to go next — takes about 3 minutes.
+        Built for undergraduate students, working professionals, and career switchers. I&apos;ll ask a few questions to start your career memory layer — takes about 3 minutes.
       </p>
       <p className="text-slate-600 leading-relaxed">
-        For your work and education, just give me <span className="font-medium text-slate-900">keywords and numbers</span>. I&apos;ll do the heavy lifting and turn them into proper resume bullets when you generate your resume.
+        For your work and education, just give me <span className="font-medium text-slate-900">keywords and numbers</span>. I&apos;ll handle the heavy lifting and turn them into proper resume bullets when you generate your resume.
       </p>
     </div>
   );

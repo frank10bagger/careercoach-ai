@@ -1,8 +1,12 @@
-# CareerCoach AI — User Guide
+# CareerTwin — User Guide
+
+**Tagline:** the digital twin for your career management
 
 **Live URL:** https://careercoach-ai-phi.vercel.app
 
-A persistent AI career mentor for **undergraduate students**. From self-discovery to signed offer — resume, cover letter, and thank-you email, tailored to who you are and the internships and roles you want.
+CareerTwin brings your fragmented career information — resumes, achievements, goals, applications, coffee chats, interview feedback, networking notes, LinkedIn presence, and milestones — into one living memory layer. Instead of manually remembering what happened, rewriting the same story, or updating every career asset yourself, CareerTwin captures the important moments and turns them into reusable profile intelligence.
+
+Built for undergraduate students, working professionals, and career switchers.
 
 ---
 
