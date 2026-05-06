@@ -62,8 +62,8 @@ Classify and respond with JSON only.`;
 // =========================================================================
 // RESUME — generate tailored MBA-quality resume
 // =========================================================================
-type ExperienceInput = { company: string; title: string; start_date: string; end_date: string; raw_keywords: string };
-type EducationInput = { school: string; degree: string; field_of_study: string; graduation_year: string };
+type ExperienceInput = { company: string; title: string; location: string; start_date: string; end_date: string; raw_keywords: string };
+type EducationInput = { school: string; degree: string; field_of_study: string; start_year: string; graduation_year: string };
 
 export function resumePrompt(input: {
   fullName: string;
@@ -78,64 +78,67 @@ export function resumePrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
-You generate MBA-quality, one-page resumes in plain text. Match the structure, tone, and bullet style of the example below.
+You generate professional one-page resumes in plain text for undergraduate students applying to internships and first full-time roles. The example below shows the STRUCTURE and BULLET STYLE — copy that style, but scale seniority to whatever the candidate provides. A college sophomore who interned at a startup gets shorter, more modest bullets than a 10-year executive.
 
-YOUR PRIMARY JOB: the candidate gives you raw keywords and numbers. You buff them up into properly worded, action-verb-led, quantified bullets that read like real Wharton MBA alumni resumes. Keywords like "$42M cost savings, 8-person team, fintech client" should become "Led 8-person team on cost optimization engagement for $1.5B fintech client; identified and implemented $42M in annual savings within 6 months."
+YOUR PRIMARY JOB: the candidate gives you raw keywords and numbers. You buff them up into properly worded, action-verb-led, quantified bullets. Keywords like "data analysis SQL, automated weekly reports saved 5 hours/week, 3 stakeholder presentations" should become "Built SQL-based reporting automation that reduced weekly analyst time by 5 hours; presented findings to 3 senior stakeholders driving operational decisions."
 
 STRUCTURE:
-- Name, contact line (use placeholders if no email/phone given)
-- Optional one-paragraph EXECUTIVE SUMMARY (3-4 lines, only if useful)
-- EXPERIENCE: each role = COMPANY NAME + Location, Title + Dates (right-aligned via spaces), 3-5 bullets per role
+- Name (line 1), contact line (line 2, use placeholders [email] / [phone] / linkedin.com/in/[handle] if not provided)
+- EXPERIENCE: each role = COMPANY NAME on one line with location right-aligned via 2+ spaces, then Title on next line with dates right-aligned via 2+ spaces, then 2-4 bullets
 - EDUCATION
-- ADDITIONAL INFORMATION (only if relevant)
+- (Optional) ADDITIONAL INFORMATION — only if relevant info given
 
-RULES:
-- Every bullet starts with a verb (Led, Built, Reduced, Scaled, Drove, Architected, etc.)
-- Every bullet should have NUMERIC impact where the input gives any numbers ($, %, count, time)
-- DO NOT fabricate numbers the candidate didn't provide. If they gave "increased revenue", buff to "Drove revenue growth" — not "Drove 47% revenue growth" unless they said 47%.
-- No first-person pronouns
-- Plain text only, no markdown asterisks or hashes
-- One page worth of content (≈30-40 lines)
-- Use 2+ spaces to align dates/locations to the right (the example shows the pattern)
+ABSOLUTE RULES — VIOLATIONS WILL RUIN THE OUTPUT:
+1. USE THE EXACT DATES THE CANDIDATE GIVES. If they gave "Jun 2024 – Sep 2024", write "Jun 2024 – Sep 2024" — NOT "[Start] – [End]" placeholders.
+2. USE THE EXACT EDUCATION THE CANDIDATE GIVES. If they wrote "BS in Computer Science, Stanford, 2024", do NOT replace it with MBA or any other degree. The example below shows MBA but that does NOT mean every resume should be MBA.
+3. DO NOT FABRICATE numbers the candidate didn't provide. "Increased revenue" must NOT become "Increased revenue 47%" unless they said 47%.
+4. USE THE EXACT LOCATIONS the candidate gives for each job. If they gave "New York, NY", write "New York, NY" — NOT "[Location]".
+5. If the candidate did NOT give a piece of info (location, dates, keywords), use the placeholder "[add location]" or "[add dates]" — do NOT invent.
+6. Every bullet starts with a strong action verb (Built, Led, Drove, Designed, Analyzed, etc.). NO first-person pronouns.
+7. Plain text only. No markdown. No asterisks for bold. No hashes for headers. Use 2+ spaces to right-align text.
+8. Output ONLY the resume — no explanation, no "Here is your resume", no closing notes.
 
-EXAMPLE FOR REFERENCE:
+EXAMPLE (note: this is an MBA executive — for an undergrad student, scale bullets DOWN to internship-appropriate language and length):
 ${RESUME_EXAMPLE_CONSULTING}`;
 
   const expBlock = input.experiences.length > 0
     ? input.experiences
         .map((e, i) =>
-          `Job ${i + 1}:
+          `Job ${i + 1} of ${input.experiences.length}:
   Company: ${e.company}
   Title: ${e.title}
-  Dates: ${e.start_date || '?'} – ${e.end_date || 'present'}
-  Keywords (buff these into ${e.raw_keywords ? '3-5' : '0'} bullets): ${e.raw_keywords || '(no detail given — skip bullets for this role or use [add detail])'}`
+  Location: ${e.location || '(not provided — use [add location])'}
+  Dates: ${e.start_date || '(not provided)'} – ${e.end_date || 'Present'}
+  Keywords to buff into ${e.raw_keywords?.trim() ? '2-4 bullets' : '0 bullets'}: ${e.raw_keywords?.trim() || '(no keywords given — write a single placeholder bullet [add accomplishment with metric])'}`
         )
         .join('\n\n')
-    : `(No experiences captured. Use the candidate's current role "${input.presentRole}" and the topAchievements field below as the source of bullets.)\n\nTop achievements: ${input.topAchievements || '(none)'}`;
+    : `(No work experiences captured. Skip the EXPERIENCE section or write a single placeholder.)`;
 
   const eduBlock = input.educations.length > 0
     ? input.educations
-        .map((e) => `${e.degree}${e.field_of_study ? ' in ' + e.field_of_study : ''}, ${e.school}${e.graduation_year ? ' · ' + e.graduation_year : ''}`)
+        .map((e) => {
+          const dates = e.start_year && e.graduation_year
+            ? `${e.start_year} – ${e.graduation_year}`
+            : (e.graduation_year || e.start_year || '(no year given)');
+          return `${e.school}: ${e.degree}${e.field_of_study ? ' in ' + e.field_of_study : ''} (${dates})`;
+        })
         .join('\n')
-    : '(No education captured — use a single Wharton MBA placeholder line.)';
+    : `(No education captured. Write a single placeholder line: "[School]                                              [Location]\\n[Degree]                                              [Year]")`;
 
-  const user = `Generate a tailored resume for this candidate:
-
-CANDIDATE
+  const user = `CANDIDATE
 Name: ${input.fullName}
-Current role: ${input.presentRole}
-Years of experience: ${input.yearsExperience}
+Today's role: ${input.presentRole}
+Total years of experience: ${input.yearsExperience}
 Target role: ${input.targetRole}
 Target industry: ${input.targetIndustry}
-Persona: ${input.personaType}
 
-WORK HISTORY (oldest to most recent — but render most-recent first in the resume):
+WORK HISTORY — render in resume in REVERSE CHRONOLOGICAL ORDER (most recent first):
 ${expBlock}
 
-EDUCATION:
+EDUCATION — render in resume in REVERSE CHRONOLOGICAL ORDER:
 ${eduBlock}
 
-Tailor language and emphasis toward the target role. Use the keywords I gave you to write proper bullets — do not just echo my keywords as-is. Where I gave numbers, preserve them; do not invent numbers I didn't provide.`;
+Generate the resume now. Use ONLY the data above. Do not invent companies, dates, locations, schools, or degrees. Do not include an EXECUTIVE SUMMARY for an undergraduate; it's optional for senior candidates only.`;
 
   const mockResponse = `(MOCK RESUME — set MOCK_AI=false to use real Claude)
 
@@ -143,10 +146,10 @@ ${input.fullName.toUpperCase()}
 [email] | [phone] | linkedin.com/in/[handle]
 
 EXPERIENCE
-${input.experiences.map((e) => `${e.company.toUpperCase()}                                                          [Location]\n${e.title}                                                                  ${e.start_date || ''} – ${e.end_date || 'Present'}\n- (Buffed bullet from: ${e.raw_keywords || 'no keywords given'})\n`).join('\n')}
+${input.experiences.map((e) => `${e.company.toUpperCase()}                                                          ${e.location || '[add location]'}\n${e.title}                                                                  ${e.start_date || '?'} – ${e.end_date || 'Present'}\n- (Buffed bullet from: ${e.raw_keywords || 'no keywords given'})\n`).join('\n')}
 
 EDUCATION
-${input.educations.map((e) => `${e.school.toUpperCase()}                                                          ${e.graduation_year || ''}\n${e.degree}${e.field_of_study ? ' in ' + e.field_of_study : ''}`).join('\n\n')}`;
+${input.educations.map((e) => `${e.school.toUpperCase()}                                                          ${e.start_year && e.graduation_year ? `${e.start_year} – ${e.graduation_year}` : e.graduation_year || ''}\n${e.degree}${e.field_of_study ? ' in ' + e.field_of_study : ''}`).join('\n\n')}`;
 
   return { system, user, mockResponse };
 }

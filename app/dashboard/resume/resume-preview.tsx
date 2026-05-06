@@ -1,16 +1,10 @@
-// Renders the plain-text resume Claude generates as a styled, print-ready preview.
-// Heuristics:
-//  - Line 0 = NAME (centered, large, bold)
-//  - Line 1 = contact line (centered, muted)
-//  - ALL-CAPS lines = section headers (uppercase tracking, bottom border)
-//  - "Company  ...  Location" / "Title  ...  Dates" two-column lines (split on 2+ spaces)
-//  - Lines starting with "-" = bullets
-//  - Other = body paragraphs
+// Renders plain-text resume as styled preview. Uses inline styles + hex colors
+// (NOT Tailwind oklch classes) so html2canvas/jsPDF capture it cleanly.
 
 const SECTION_HEADERS = new Set([
   'EXECUTIVE SUMMARY', 'SUMMARY', 'EXPERIENCE', 'PROFESSIONAL EXPERIENCE',
   'EDUCATION', 'SKILLS', 'ADDITIONAL INFORMATION', 'CERTIFICATIONS',
-  'LEADERSHIP', 'PROJECTS',
+  'LEADERSHIP', 'PROJECTS', 'INTERESTS',
 ]);
 
 function classify(line: string) {
@@ -29,6 +23,10 @@ function classify(line: string) {
   return { type: 'body' as const, text: t };
 }
 
+const TEXT = '#1a1a1a';
+const MUTED = '#555555';
+const BORDER = '#cccccc';
+
 export default function ResumePreview({ content }: { content: string }) {
   const lines = content.split('\n');
   const name = (lines[0] || '').trim();
@@ -38,26 +36,46 @@ export default function ResumePreview({ content }: { content: string }) {
   return (
     <div
       id="resume-preview"
-      className="bg-white p-12 border border-slate-200 rounded-lg shadow-sm print:shadow-none print:border-0 print:rounded-none print:p-0"
-      style={{ fontFamily: '"Calibri", "Segoe UI", "Helvetica Neue", Arial, sans-serif' }}
+      style={{
+        background: '#ffffff',
+        color: TEXT,
+        padding: '40px 48px',
+        border: `1px solid ${BORDER}`,
+        borderRadius: 8,
+        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+        fontFamily: '"Calibri", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
+        fontSize: 13,
+        lineHeight: 1.45,
+        maxWidth: 800,
+        margin: '0 auto',
+      }}
     >
       {name && (
-        <h1 className="text-3xl font-bold text-center text-slate-900 mb-1">
+        <h1 style={{ fontSize: 28, fontWeight: 700, textAlign: 'center', margin: '0 0 4px 0', color: TEXT }}>
           {name}
         </h1>
       )}
       {contact && (
-        <p className="text-sm text-slate-500 text-center mb-6">{contact}</p>
+        <p style={{ fontSize: 12, color: MUTED, textAlign: 'center', margin: '0 0 20px 0' }}>{contact}</p>
       )}
 
-      <div className="space-y-1 text-[13px] leading-snug text-slate-800">
+      <div>
         {body.map((b, i) => {
-          if (b.type === 'blank') return <div key={i} className="h-2" />;
+          if (b.type === 'blank') return <div key={i} style={{ height: 6 }} />;
           if (b.type === 'section') {
             return (
               <h2
                 key={i}
-                className="text-sm font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 pt-3 mb-1"
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: 1.2,
+                  color: TEXT,
+                  margin: '14px 0 6px 0',
+                  paddingBottom: 3,
+                  borderBottom: `1px solid ${BORDER}`,
+                }}
               >
                 {b.text}
               </h2>
@@ -66,21 +84,29 @@ export default function ResumePreview({ content }: { content: string }) {
           if (b.type === 'twocol') {
             const looksLikeCompany = /^[A-Z &.,'-]{3,}$/.test(b.left);
             return (
-              <div key={i} className="flex justify-between gap-4">
-                <span className={looksLikeCompany ? 'font-semibold' : ''}>{b.left}</span>
-                <span className="text-slate-600 whitespace-nowrap">{b.right}</span>
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  margin: '2px 0',
+                }}
+              >
+                <span style={{ fontWeight: looksLikeCompany ? 700 : 400, color: TEXT }}>{b.left}</span>
+                <span style={{ color: MUTED, whiteSpace: 'nowrap' }}>{b.right}</span>
               </div>
             );
           }
           if (b.type === 'bullet') {
             return (
-              <div key={i} className="flex gap-2 ml-3">
-                <span className="text-slate-400 mt-0.5">•</span>
-                <span className="flex-1">{b.text}</span>
+              <div key={i} style={{ display: 'flex', gap: 8, marginLeft: 12, margin: '3px 0 3px 12px' }}>
+                <span style={{ color: MUTED, marginTop: 2 }}>•</span>
+                <span style={{ flex: 1, color: TEXT }}>{b.text}</span>
               </div>
             );
           }
-          return <p key={i}>{b.text}</p>;
+          return <p key={i} style={{ margin: '3px 0', color: TEXT }}>{b.text}</p>;
         })}
       </div>
     </div>

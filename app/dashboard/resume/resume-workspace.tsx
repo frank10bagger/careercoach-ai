@@ -43,8 +43,32 @@ export default function ResumeWorkspace({
     }, 50);
   }
 
-  function handleDownloadPdf() {
-    window.print();
+  async function handleDownloadPdf() {
+    const element = document.getElementById('resume-preview');
+    if (!element) return;
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ]);
+    const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' });
+    const pageWidth = 8.5;
+    const pageHeight = 11;
+    const margin = 0.5;
+    const usableWidth = pageWidth - 2 * margin;
+    const imgHeight = (canvas.height * usableWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = margin;
+    pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, imgHeight);
+    heightLeft -= pageHeight - 2 * margin;
+    while (heightLeft > 0) {
+      position = -(imgHeight - heightLeft) + margin;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', margin, position, usableWidth, imgHeight);
+      heightLeft -= pageHeight - 2 * margin;
+    }
+    pdf.save(`resume-${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 
   async function handleGenerate() {

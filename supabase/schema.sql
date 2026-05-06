@@ -41,6 +41,7 @@ create table if not exists public.experiences (
 -- Idempotent migration for existing tables (Postgres doesn't error on ADD COLUMN IF NOT EXISTS)
 alter table public.experiences add column if not exists raw_keywords text;
 alter table public.experiences add column if not exists position_order integer default 0;
+alter table public.experiences add column if not exists location text;
 
 -- =========================================================================
 -- 2b. EDUCATION — degrees / schools (one row per entry)
@@ -51,11 +52,14 @@ create table if not exists public.education (
   school text,
   degree text,
   field_of_study text,
+  start_year text,
   graduation_year text,
   honors text,
   position_order integer default 0,
   created_at timestamptz default now()
 );
+
+alter table public.education add column if not exists start_year text;
 
 alter table public.education enable row level security;
 drop policy if exists "own education" on public.education;

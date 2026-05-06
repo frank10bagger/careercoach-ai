@@ -19,6 +19,7 @@ export async function POST() {
   const experiences = (expRes.data ?? []).map((e) => ({
     company: e.company || '',
     title: e.title || '',
+    location: e.location || '',
     start_date: e.start_date || '',
     end_date: e.end_date || '',
     raw_keywords: e.raw_keywords || '',
@@ -27,6 +28,7 @@ export async function POST() {
     school: e.school || '',
     degree: e.degree || '',
     field_of_study: e.field_of_study || '',
+    start_year: e.start_year || '',
     graduation_year: e.graduation_year || '',
   }));
 

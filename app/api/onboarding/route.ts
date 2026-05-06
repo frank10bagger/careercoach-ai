@@ -11,8 +11,8 @@ export async function POST(req: Request) {
 
   const body = await req.json();
   const yearsExperience = parseInt(body.yearsExperience, 10) || 0;
-  const experiences: Array<{ company: string; title: string; start_date: string; end_date: string; raw_keywords: string }> = body.experiences || [];
-  const educations: Array<{ school: string; degree: string; field_of_study: string; graduation_year: string }> = body.educations || [];
+  const experiences: Array<{ company: string; title: string; location: string; start_date: string; end_date: string; raw_keywords: string }> = body.experiences || [];
+  const educations: Array<{ school: string; degree: string; field_of_study: string; start_year: string; graduation_year: string }> = body.educations || [];
 
   // Build a brief topAchievements summary from raw keywords for backward compat
   const topAchievements = experiences
@@ -79,6 +79,7 @@ export async function POST(req: Request) {
       user_id: user.id,
       company: e.company,
       title: e.title,
+      location: e.location,
       start_date: e.start_date,
       end_date: e.end_date,
       raw_keywords: e.raw_keywords,
@@ -96,6 +97,7 @@ export async function POST(req: Request) {
       school: e.school,
       degree: e.degree,
       field_of_study: e.field_of_study,
+      start_year: e.start_year,
       graduation_year: e.graduation_year,
       position_order: i,
     }));
