@@ -73,16 +73,16 @@ export default function HighlightsWorkspace({ highlights }: { highlights: Highli
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">What did you do?</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">What happened?</label>
           <p className="text-xs text-slate-500 mb-1.5">
-            Just keywords and numbers. AI will buff it into a polished LinkedIn post + a resume bullet.
+            ONE moment per highlight — a promotion, a launch, an award, a milestone. AI will build the full story around it.
           </p>
           <textarea
             value={rawDescription}
             onChange={(e) => setRawDescription(e.target.value)}
-            rows={5}
+            rows={3}
             required
-            placeholder="e.g. 'Got promoted to Senior Consultant. Led $50M cost reduction project for Bank of America. 6 months. Mentored 3 junior analysts. Kicked off in October 2025.'"
+            placeholder="e.g. 'Got promoted to Senior Consultant at Bain.' or 'Closed our first $1M enterprise deal.' or 'Shipped the v2 launch after 6 months of work.'"
             className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-slate-900"
           />
         </div>

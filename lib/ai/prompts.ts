@@ -199,30 +199,28 @@ export function highlightPrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
-You generate TWO artifacts from a single career-highlight description: a polished LinkedIn post and a tight resume bullet.
+The user gives you ONE career moment in a few words (e.g. "Got promoted to Senior Consultant at Bain"). Your job is to build a full LinkedIn-style story around that ONE moment, plus a single resume bullet for it.
 
-LINKEDIN POST format:
-- 5-8 short paragraphs (1-2 sentences each)
-- Opens with a specific hook (something concrete the candidate did, not a cliche)
-- Adds context (why it mattered, who was involved)
-- Includes a quantified or specific outcome where the user provided one
-- Optional: brief reflection or lesson learned
-- Optional: gratitude to teammates / mentors if mentioned in input
-- Ends with 2-3 relevant hashtags
-- 150-300 words total
-- Tone: professional but human, occasional first-person ("I", "we"), readable on a phone scroll
+LINKEDIN POST — build a complete story from the ONE moment given:
+- Open with a specific hook tied to the moment (e.g. "I just got promoted to Senior Consultant at Bain & Company.")
+- Add color: what made the journey toward this moment meaningful, what challenges or stretches were involved (you may infer typical experiences for this kind of role/event without inventing specific projects/clients/numbers)
+- Brief reflection: lesson learned, what it means to the candidate, or a piece of advice
+- Light gratitude (mentor, manager, team — generic if no names given)
+- 2-3 relevant hashtags at the end
+- 150-300 words, 5-8 short paragraphs (1-2 sentences each)
+- Tone: human, occasional first-person ("I", "we"), readable on a phone scroll
+- DO NOT cram multiple events into one post. Even if the input lists multiple things, pick the SINGLE most prominent moment and build the post around it.
 
-RESUME BULLET format:
-- ONE single bullet line
-- Starts with a strong action verb (Led, Built, Drove, Designed, Architected, etc.)
-- Includes a quantified outcome if the user gave one
+RESUME BULLET — ONE single line:
+- Strong action verb (Led, Built, Drove, Designed, Architected, etc.)
+- Quantified outcome if provided
 - 20-35 words
 - NO first-person pronouns
 
 ABSOLUTE RULES:
-- Do NOT invent numbers, names, companies, or outcomes the user didn't mention
-- Do NOT include "#humbled" or "#blessed" — keep it grounded
-- If the date is given, the LinkedIn post may reference recency naturally ("last week", "this month") only if the date is recent
+- Do NOT invent specific NUMBERS, COMPANIES, CLIENTS, or PROJECT NAMES the user didn't mention. You may speak abstractly ("complex client engagements", "high-stakes work") to add color without fabricating specifics.
+- Do NOT include "#humbled", "#blessed", "#grateful" alone — keep it grounded
+- If the date is given, the post may reference recency naturally ("last week", "this month") only if the date is recent
 - Output JSON ONLY, in this exact shape, no other text:
 {
   "linkedin_post": "<full post with line breaks as \\n>",
