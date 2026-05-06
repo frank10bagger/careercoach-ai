@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ResumePreview from './resume-preview';
 
 type Resume = {
   id: string;
@@ -23,12 +24,33 @@ export default function ResumeWorkspace({
   const [content, setContent] = useState(latest?.content_text || '');
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  function handleCopy() {
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  function handlePublish() {
+    setShowPreview(true);
+    // Smooth scroll to preview after render
+    setTimeout(() => {
+      document.getElementById('resume-preview')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+
+  function handleDownloadPdf() {
+    window.print();
+  }
 
   async function handleGenerate() {
     setError(null);
     setGenerating(true);
+    setShowPreview(false);
     const res = await fetch('/api/resume', { method: 'POST' });
     setGenerating(false);
     if (!res.ok) {
@@ -61,7 +83,7 @@ export default function ResumeWorkspace({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 print:hidden">
         <button
           onClick={handleGenerate}
           disabled={generating}
@@ -70,24 +92,44 @@ export default function ResumeWorkspace({
           {generating ? 'Generating...' : latest ? 'Regenerate' : `Generate resume for ${profile.target_role || 'target role'}`}
         </button>
         {content && (
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-4 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-medium hover:bg-slate-50 transition disabled:opacity-50"
-          >
-            {saving ? 'Saving...' : 'Save edits as new version'}
-          </button>
+          <>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-4 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-medium hover:bg-slate-50 transition disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save edits'}
+            </button>
+            <button
+              onClick={handleCopy}
+              className="px-4 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg font-medium hover:bg-slate-50 transition"
+            >
+              {copied ? 'Copied!' : 'Copy text'}
+            </button>
+            <button
+              onClick={handlePublish}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition"
+            >
+              Publish →
+            </button>
+          </>
         )}
       </div>
 
+      {content && !generating && !showPreview && (
+        <p className="text-xs text-slate-500 print:hidden">
+          Edit the plain text below, then click <span className="font-medium text-emerald-700">Publish</span> to see the formatted preview and download as PDF.
+        </p>
+      )}
+
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 print:hidden">
           {error}
         </div>
       )}
 
       {!content && !generating && (
-        <div className="p-8 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center text-slate-500">
+        <div className="p-8 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center text-slate-500 print:hidden">
           No resume yet. Click <span className="font-medium text-slate-700">Generate resume</span> to create one from your profile.
         </div>
       )}
@@ -96,14 +138,40 @@ export default function ResumeWorkspace({
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          rows={28}
+          rows={20}
           placeholder={generating ? 'Generating your resume...' : ''}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg font-mono text-sm leading-relaxed focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none"
+          className="w-full px-4 py-3 border border-slate-300 rounded-lg font-mono text-xs leading-relaxed focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none print:hidden"
         />
       )}
 
+      {showPreview && content && (
+        <div className="space-y-3 pt-4">
+          <div className="flex items-center justify-between print:hidden">
+            <h3 className="font-semibold text-slate-900">Formatted preview</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowPreview(false)}
+                className="px-3 py-1.5 text-sm bg-white text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50 transition"
+              >
+                Back to editor
+              </button>
+              <button
+                onClick={handleDownloadPdf}
+                className="px-3 py-1.5 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+              >
+                Download PDF
+              </button>
+            </div>
+          </div>
+          <ResumePreview content={content} />
+          <p className="text-xs text-slate-400 text-center print:hidden">
+            Click <span className="font-medium">Download PDF</span> → in the print dialog choose <span className="font-medium">&ldquo;Save as PDF&rdquo;</span> as the destination.
+          </p>
+        </div>
+      )}
+
       {history.length > 0 && (
-        <div className="pt-6 border-t border-slate-200">
+        <div className="pt-6 border-t border-slate-200 print:hidden">
           <h3 className="font-semibold text-slate-900 mb-2">Version history</h3>
           <ul className="text-sm text-slate-600 space-y-1">
             {history.map((r) => (
