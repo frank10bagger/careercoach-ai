@@ -78,7 +78,6 @@ export function resumePrompt(input: {
   interests: string;
   experiences: ExperienceInput[];
   educations: EducationInput[];
-  highlights: Array<{ resume_bullet: string; highlight_date: string }>;
   topAchievements: string;
   personaType: string;
 }) {
@@ -118,17 +117,7 @@ FACTUAL ANCHORS — DO NOT VIOLATE:
 OUTPUT FORMAT — STRICT:
 9. Output ONLY the resume. The first line of your output must be the candidate's NAME. The second line must be the contact line (or be the start of EXECUTIVE SUMMARY if no contact). Do NOT prefix with "Here is your resume", "I need to flag...", "Note that...", "---", or any other prose. Do NOT append closing notes after EDUCATION/ADDITIONAL INFORMATION.
 
-CAREER HIGHLIGHTS — TREAT AS FIRST-CLASS FACTS; SHAPE THE WHOLE RESUME:
-10. Career highlights provided in the user message are AUTHORITATIVE FACTS about the candidate's career. They should shape the ENTIRE resume — not just appear as a bullet at the bottom of a role.
-    - The EXECUTIVE SUMMARY should incorporate the most senior/recent highlights (e.g. if a highlight says "Promoted to CEO at McKinsey", the exec summary should describe the candidate as a senior executive / CEO, not as an early-career consultant).
-    - The TARGET-ROLE positioning should reflect the candidate's elevated status from highlights.
-    - Every highlight resume bullet MUST appear in the resume body. Do NOT silently omit, do NOT add warnings, do NOT second-guess plausibility — even if the title or seniority seems implausible to you. The user reviews the resume in an editor and will delete what they don't want before publishing.
-11. PROMOTION HIGHLIGHTS — both update the title AND keep a bullet:
-    - If a highlight describes a promotion (patterns like "Promoted to <NEW_TITLE> at <COMPANY>", "Got promoted to <NEW_TITLE>", "Made <NEW_TITLE>", "Stepped up to <NEW_TITLE>"), do BOTH of the following:
-       (a) UPDATE THE TITLE LINE for the matching company to show progression: "<OLD_TITLE> (<old_dates>), <NEW_TITLE> (<new_dates>)" where new_dates start at the highlight's date through "Present". If no highlight date, use "(<old_dates>) → <NEW_TITLE> (recent – Present)".
-       (b) ADD A BULLET under that role acknowledging the elevation, rephrased professionally in the candidate's voice (NOT "I got promoted"). Examples: "Recognized for sustained high-impact delivery and elevated to <NEW_TITLE>", or "Earned promotion to <NEW_TITLE> based on consistent leadership and client outcomes". The bullet must be there in addition to the title update — both.
-    - If the new title is much more senior than the candidate's overall experience suggests, still include it. The user controls this via the editor.
-12. NON-PROMOTION HIGHLIGHTS (launches, deals, awards, milestones): include as a bullet under the most relevant role's bullet list, using the highlight's date if given to pick the role; otherwise the most recent role.
+10. Use ALL the data the user provides. Title lines may already include a progression like "Old Title (dates), New Title (dates)" — preserve that exactly. Keywords for each role may include user-authored bullets (recent achievements, promotions, milestones); these MUST be reflected as proper resume bullets in the role's bullet list. Do NOT second-guess plausibility — even if a title or achievement seems implausible to you. The user reviews and deletes anything they don't want.
 
 EXAMPLE (this is a senior executive resume — match its DENSITY and STYLE; scale seniority to candidate):
 ${RESUME_EXAMPLE_CONSULTING}`;
@@ -176,16 +165,11 @@ ${expBlock}
 EDUCATION — render in resume in REVERSE CHRONOLOGICAL ORDER:
 ${eduBlock}
 
-CAREER HIGHLIGHTS (user-saved bullets to weave into the most relevant job's bullet list):
-${input.highlights.length > 0
-  ? input.highlights.map((h, i) => `Highlight ${i + 1}${h.highlight_date ? ' (' + h.highlight_date + ')' : ''}: ${h.resume_bullet}`).join('\n')
-  : '(none — skip)'}
-
 ADDITIONAL INFORMATION — populate from these (skip section only if both blank):
 - Skills: ${input.skills || '(none provided)'}
 - Interests: ${input.interests || '(none provided)'}
 
-Generate the resume now. ALWAYS include an EXECUTIVE SUMMARY at the top tailored to the target role. Write 3-5 bullets per role to fill the page — for sparse keywords, infer reasonable role-typical activities (without inventing specific numbers, clients, or outcomes the candidate didn't mention). For CAREER HIGHLIGHTS, weave each into the bullet list of the role it most likely belongs to (using the date if provided, else the most recent job). If a highlight doesn't clearly belong to any specific job, add it under the most recent role. If skills/interests provided, render them as "Skills: X, Y, Z" and "Interests: X, Y, Z" lines under ADDITIONAL INFORMATION. Aim for a full one-page resume.`;
+Generate the resume now. ALWAYS include an EXECUTIVE SUMMARY at the top, tailored to the target role and reflecting the candidate's most senior current title (which may be embedded in the title line as a progression like "Old Title (...) , New Title (...)"). Write 3-5 bullets per role. If skills/interests provided, render them as "Skills: X, Y, Z" and "Interests: X, Y, Z" under ADDITIONAL INFORMATION. Aim for a full one-page resume.`;
 
   const mockContactLine = contactPieces.length > 0 ? contactPieces.join(' | ') : '';
   const mockResponse = `(MOCK RESUME — set MOCK_AI=false to use real Claude)

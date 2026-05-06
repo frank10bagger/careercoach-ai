@@ -51,14 +51,18 @@ export async function POST() {
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('experiences').select('*').eq('user_id', user.id).order('position_order'),
     supabase.from('education').select('*').eq('user_id', user.id).order('position_order'),
-    supabase.from('career_highlights').select('resume_bullet, highlight_date').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('career_highlights').select('raw_description, resume_bullet, highlight_date').eq('user_id', user.id).order('created_at', { ascending: false }),
   ]);
 
   const profile = profileRes.data;
-  const highlights = (hlRes.data ?? [])
+  const rawHighlights = (hlRes.data ?? [])
     .filter((h) => h.resume_bullet)
-    .map((h) => ({ resume_bullet: h.resume_bullet || '', highlight_date: h.highlight_date || '' }));
-  const experiences = (expRes.data ?? []).map((e) => ({
+    .map((h) => ({
+      raw_description: h.raw_description || '',
+      resume_bullet: h.resume_bullet || '',
+      highlight_date: h.highlight_date || '',
+    }));
+  const baseExperiences = (expRes.data ?? []).map((e) => ({
     company: e.company || '',
     title: e.title || '',
     location: e.location || '',
@@ -66,6 +70,59 @@ export async function POST() {
     end_date: e.end_date || '',
     raw_keywords: e.raw_keywords || '',
   }));
+
+  // Merge highlights into the matching experience.
+  // - If a highlight mentions a company name, append its bullet to that role's keywords.
+  // - If it's a promotion ("Promoted to X at Y"), update that role's title to show progression.
+  // - Highlights with no company match become "standalone" entries appended to the most recent role.
+  const PROMOTION_RE = /\b(?:promoted to|got promoted to|elevated to|made|stepped up to|advanced to)\s+([A-Z][^.,\n]{2,80}?)(?:\s+(?:at|@|in|with)\s+([^.,\n]+))?[.!]?\s*$/i;
+
+  function findMatchingExperience(text: string): typeof baseExperiences[number] | null {
+    const lower = text.toLowerCase();
+    let best: typeof baseExperiences[number] | null = null;
+    let bestLen = 0;
+    for (const e of baseExperiences) {
+      const c = (e.company || '').trim().toLowerCase();
+      if (c.length >= 3 && lower.includes(c) && c.length > bestLen) {
+        best = e;
+        bestLen = c.length;
+      }
+    }
+    return best;
+  }
+
+  const standaloneHighlights: string[] = [];
+  const experiences = baseExperiences.map((e) => ({ ...e })); // mutable copy
+
+  for (const h of rawHighlights) {
+    const matched = findMatchingExperience(h.raw_description);
+    if (matched) {
+      const idx = experiences.indexOf(experiences.find((x) => x === matched)!);
+      const target = idx >= 0 ? experiences[idx] : null;
+      if (target) {
+        // Append resume_bullet text as an additional keyword line so the prompt naturally includes it
+        target.raw_keywords = [target.raw_keywords, h.resume_bullet].filter(Boolean).join('\n');
+
+        // If it's a promotion, update title to show progression
+        const promoMatch = h.raw_description.match(PROMOTION_RE);
+        if (promoMatch) {
+          const newTitle = promoMatch[1].trim();
+          const promotedDate = h.highlight_date || 'recent';
+          const oldTitle = target.title || 'role';
+          if (!target.title.toLowerCase().includes(newTitle.toLowerCase())) {
+            target.title = `${oldTitle} (${target.start_date || '?'} – ${promotedDate}), ${newTitle} (${promotedDate} – ${target.end_date || 'Present'})`;
+          }
+        }
+      }
+    } else {
+      standaloneHighlights.push(h.resume_bullet);
+    }
+  }
+
+  // Standalone highlights → tack on to most recent role's keywords
+  if (standaloneHighlights.length > 0 && experiences.length > 0) {
+    experiences[0].raw_keywords = [experiences[0].raw_keywords, ...standaloneHighlights].filter(Boolean).join('\n');
+  }
   const educations = (eduRes.data ?? []).map((e) => ({
     school: e.school || '',
     degree: e.degree || '',
@@ -91,7 +148,6 @@ export async function POST() {
     interests: profile.interests || '',
     experiences,
     educations,
-    highlights,
     topAchievements: profile.top_achievements || '',
     personaType: profile.persona_type || 'professional',
   });
