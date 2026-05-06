@@ -7,6 +7,7 @@ type Application = {
   id: string;
   company: string;
   job_title: string;
+  job_description?: string | null;
   cover_letter: string | null;
   created_at: string;
 };
@@ -23,6 +24,7 @@ export default function CoverLetterWorkspace({
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const router = useRouter();
 
   async function handleGenerate(e: React.FormEvent) {
@@ -132,13 +134,51 @@ export default function CoverLetterWorkspace({
       {applications.length > 0 && (
         <div className="pt-6 border-t border-slate-200">
           <h3 className="font-semibold text-slate-900 mb-3">Past applications</h3>
+          <p className="text-xs text-slate-500 mb-3">Click any item to view the saved cover letter.</p>
           <ul className="space-y-2">
-            {applications.map((a) => (
-              <li key={a.id} className="p-3 bg-white border border-slate-200 rounded-lg flex justify-between text-sm">
-                <span className="text-slate-700">{a.job_title} @ {a.company}</span>
-                <span className="text-slate-400">{new Date(a.created_at).toLocaleDateString()}</span>
-              </li>
-            ))}
+            {applications.map((a) => {
+              const isOpen = openId === a.id;
+              return (
+                <li key={a.id} className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setOpenId(isOpen ? null : a.id)}
+                    className="w-full p-3 flex justify-between items-center text-sm hover:bg-slate-50 transition text-left"
+                  >
+                    <span className="text-slate-700 flex items-center gap-2">
+                      <span className={`text-slate-400 transition-transform ${isOpen ? 'rotate-90' : ''}`}>›</span>
+                      {a.job_title} @ {a.company}
+                    </span>
+                    <span className="text-slate-400 text-xs">{new Date(a.created_at).toLocaleDateString()}</span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 border-t border-slate-100 bg-slate-50/50">
+                      {a.cover_letter && (
+                        <div className="mt-3">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-1.5">Cover letter</p>
+                          <div className="p-3 bg-white border border-slate-200 rounded text-xs leading-relaxed whitespace-pre-wrap font-mono">
+                            {a.cover_letter}
+                          </div>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(a.cover_letter || '')}
+                            className="mt-2 text-xs text-emerald-700 hover:underline"
+                          >
+                            Copy to clipboard
+                          </button>
+                        </div>
+                      )}
+                      {a.job_description && (
+                        <div className="mt-3">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-1.5">Job description</p>
+                          <div className="p-3 bg-white border border-slate-200 rounded text-xs leading-relaxed whitespace-pre-wrap text-slate-600 max-h-40 overflow-y-auto">
+                            {a.job_description}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

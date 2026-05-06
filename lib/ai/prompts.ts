@@ -74,6 +74,8 @@ export function resumePrompt(input: {
   yearsExperience: number;
   targetRole: string;
   targetIndustry: string;
+  skills: string;
+  interests: string;
   experiences: ExperienceInput[];
   educations: EducationInput[];
   topAchievements: string;
@@ -156,7 +158,11 @@ ${expBlock}
 EDUCATION — render in resume in REVERSE CHRONOLOGICAL ORDER:
 ${eduBlock}
 
-Generate the resume now. ALWAYS include an EXECUTIVE SUMMARY at the top tailored to the target role. Write 3-5 bullets per role to fill the page — for sparse keywords, infer reasonable role-typical activities (without inventing specific numbers, clients, or outcomes the candidate didn't mention). Aim for a full one-page resume.`;
+ADDITIONAL INFORMATION — populate from these (skip section only if both blank):
+- Skills: ${input.skills || '(none provided)'}
+- Interests: ${input.interests || '(none provided)'}
+
+Generate the resume now. ALWAYS include an EXECUTIVE SUMMARY at the top tailored to the target role. Write 3-5 bullets per role to fill the page — for sparse keywords, infer reasonable role-typical activities (without inventing specific numbers, clients, or outcomes the candidate didn't mention). If skills/interests provided, render them as "Skills: X, Y, Z" and "Interests: X, Y, Z" lines under ADDITIONAL INFORMATION. Aim for a full one-page resume.`;
 
   const mockContactLine = contactPieces.length > 0 ? contactPieces.join(' | ') : '';
   const mockResponse = `(MOCK RESUME — set MOCK_AI=false to use real Claude)
@@ -168,6 +174,49 @@ ${input.experiences.map((e) => `${e.company.toUpperCase()}                      
 
 EDUCATION
 ${input.educations.map((e) => `${e.school.toUpperCase()}                                                          ${e.start_year && e.graduation_year ? `${e.start_year} – ${e.graduation_year}` : e.graduation_year || ''}\n${e.degree}${e.field_of_study ? ' in ' + e.field_of_study : ''}`).join('\n\n')}`;
+
+  return { system, user, mockResponse };
+}
+
+// =========================================================================
+// SUGGEST — quick skill / interest auto-populate based on profile
+// =========================================================================
+export function suggestPrompt(input: {
+  type: 'skills' | 'interests';
+  presentRole: string;
+  targetRole: string;
+  targetIndustry: string;
+  experiences: ExperienceInput[];
+  educations: EducationInput[];
+}) {
+  const isSkills = input.type === 'skills';
+
+  const system = `${SAFETY_PREAMBLE}
+
+You suggest a comma-separated list for a candidate's resume's "Additional Information" section. Output FORMAT: only a comma-separated list, no introduction, no bullets, no explanation.
+
+For SKILLS: 6-10 items mixing hard skills (tools, languages, methods) and soft skills relevant to the candidate's role and target. Examples: "SQL, Python, Excel modeling, Market sizing, Stakeholder management, Cross-functional leadership".
+
+For INTERESTS: 4-6 plausible, professional interests that round out the candidate. Examples: "Distance running, Cooking Sichuan cuisine, Chess (USCF 1800), Volunteer tutoring (Big Brothers Big Sisters)".
+
+RULES:
+- Output ONLY the comma-separated list. No "Here are some suggestions:". No bullet points. No quotes.
+- Keep each item short (1-5 words).
+- Tailor to the candidate's industry and target role.
+- Do NOT invent specific elite credentials (e.g. "Olympic medalist", "Forbes 30 Under 30") unless the user explicitly listed them.`;
+
+  const user = `Candidate:
+- Today's role: ${input.presentRole}
+- Target role: ${input.targetRole}
+- Target industry: ${input.targetIndustry}
+- Work history: ${input.experiences.map((e) => `${e.title} @ ${e.company}`).join('; ') || '(none)'}
+- Education: ${input.educations.map((e) => `${e.degree} ${e.school}`).join('; ') || '(none)'}
+
+Suggest a comma-separated list of ${isSkills ? '6-10 skills (mix of hard and soft)' : '4-6 plausible professional interests'} appropriate for this person's background and target role.`;
+
+  const mockResponse = isSkills
+    ? 'SQL, Python, Excel modeling, Stakeholder management, Cross-functional leadership, Market sizing, Communication, Strategic planning'
+    : 'Distance running, Cooking, Reading non-fiction, Volunteer tutoring';
 
   return { system, user, mockResponse };
 }

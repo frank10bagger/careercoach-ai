@@ -73,6 +73,8 @@ export async function POST(req: Request) {
       years_experience: yearsExperience,
       target_role: body.targetRole,
       target_industry: body.targetIndustry,
+      skills_text: body.skills || null,
+      interests: body.interests || null,
       top_achievements: topAchievements,
       career_gap: body.careerGap,
       persona_type: personaType,

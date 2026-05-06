@@ -45,6 +45,8 @@ export async function POST() {
     yearsExperience: profile.years_experience || 0,
     targetRole: profile.target_role || '',
     targetIndustry: profile.target_industry || '',
+    skills: profile.skills_text || '',
+    interests: profile.interests || '',
     experiences,
     educations,
     topAchievements: profile.top_achievements || '',

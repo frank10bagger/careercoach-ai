@@ -40,11 +40,13 @@ type Profile = {
   years_experience?: number;
   target_role?: string;
   target_industry?: string;
+  skills_text?: string;
+  interests?: string;
   top_achievements?: string;
   career_gap?: string;
 };
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 export default function OnboardingForm({
   initial,
@@ -65,6 +67,8 @@ export default function OnboardingForm({
   const [contactPhone, setContactPhone] = useState(initial.contact_phone || '');
   const [contactLinkedin, setContactLinkedin] = useState(initial.contact_linkedin || '');
   const [presentRole, setPresentRole] = useState(initial.present_role || '');
+  const [skills, setSkills] = useState(initial.skills_text || '');
+  const [interests, setInterests] = useState(initial.interests || '');
   const [targetRole, setTargetRole] = useState(initial.target_role || '');
   const [targetIndustry, setTargetIndustry] = useState(initial.target_industry || '');
   const [careerGap, setCareerGap] = useState(initial.career_gap || '');
@@ -103,6 +107,8 @@ export default function OnboardingForm({
         presentRole,
         targetRole,
         targetIndustry,
+        skills,
+        interests,
         careerGap,
         experiences,
         educations,
@@ -130,8 +136,9 @@ export default function OnboardingForm({
       case 3: return presentRole.trim().length > 0;
       case 4: return true; // experience optional
       case 5: return true; // education optional
-      case 6: return targetRole.trim().length > 0;
-      case 7: return targetIndustry.trim().length > 0;
+      case 6: return true; // skills + interests optional
+      case 7: return targetRole.trim().length > 0;
+      case 8: return targetIndustry.trim().length > 0;
       default: return true;
     }
   }
@@ -158,9 +165,16 @@ export default function OnboardingForm({
         {step === 3 && <PresentRoleStep value={presentRole} onChange={setPresentRole} />}
         {step === 4 && <ExperienceStep items={experiences} setItems={setExperiences} />}
         {step === 5 && <EducationStep items={educations} setItems={setEducations} />}
-        {step === 6 && <TargetRoleStep value={targetRole} onChange={setTargetRole} />}
-        {step === 7 && <TargetIndustryStep value={targetIndustry} onChange={setTargetIndustry} />}
-        {step === 8 && (
+        {step === 6 && (
+          <SkillsInterestsStep
+            skills={skills} setSkills={setSkills}
+            interests={interests} setInterests={setInterests}
+            context={{ presentRole, targetRole, targetIndustry, experiences, educations }}
+          />
+        )}
+        {step === 7 && <TargetRoleStep value={targetRole} onChange={setTargetRole} />}
+        {step === 8 && <TargetIndustryStep value={targetIndustry} onChange={setTargetIndustry} />}
+        {step === 9 && (
           <Review
             data={{ fullName, presentRole, targetRole, targetIndustry, experiences, educations }}
             onCareerGapChange={setCareerGap}
@@ -530,6 +544,89 @@ function EducationStep({ items, setItems }: { items: Education[]; setItems: (e: 
           + Add {items.length === 0 ? 'a degree' : 'another degree'}
         </button>
       )}
+    </div>
+  );
+}
+
+function SkillsInterestsStep({
+  skills, setSkills, interests, setInterests, context,
+}: {
+  skills: string; setSkills: (v: string) => void;
+  interests: string; setInterests: (v: string) => void;
+  context: { presentRole: string; targetRole: string; targetIndustry: string; experiences: Experience[]; educations: Education[] };
+}) {
+  const [loadingSkills, setLoadingSkills] = useState(false);
+  const [loadingInterests, setLoadingInterests] = useState(false);
+
+  async function suggest(type: 'skills' | 'interests') {
+    if (type === 'skills') setLoadingSkills(true); else setLoadingInterests(true);
+    try {
+      const res = await fetch('/api/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, ...context }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (type === 'skills') setSkills(data.suggestions);
+        else setInterests(data.suggestions);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    if (type === 'skills') setLoadingSkills(false); else setLoadingInterests(false);
+  }
+
+  return (
+    <div>
+      <QuestionHeader
+        ai="What skills and interests should I include?"
+        hint="Comma-separated. Both optional. Tap '✨ Suggest' to auto-populate based on your profile — you can edit afterward."
+      />
+
+      <div className="space-y-5">
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-sm font-medium text-slate-700">Skills</label>
+            <button
+              type="button"
+              onClick={() => suggest('skills')}
+              disabled={loadingSkills}
+              className="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md hover:bg-emerald-100 transition disabled:opacity-50"
+            >
+              {loadingSkills ? 'Thinking...' : '✨ Suggest'}
+            </button>
+          </div>
+          <textarea
+            value={skills}
+            onChange={(e) => setSkills(e.target.value)}
+            rows={3}
+            placeholder="e.g. SQL, Python, Excel modeling, Stakeholder management, Cross-functional leadership"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="text-sm font-medium text-slate-700">Interests</label>
+            <button
+              type="button"
+              onClick={() => suggest('interests')}
+              disabled={loadingInterests}
+              className="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md hover:bg-emerald-100 transition disabled:opacity-50"
+            >
+              {loadingInterests ? 'Thinking...' : '✨ Suggest'}
+            </button>
+          </div>
+          <textarea
+            value={interests}
+            onChange={(e) => setInterests(e.target.value)}
+            rows={2}
+            placeholder="e.g. Distance running, Cooking Sichuan cuisine, Chess, Volunteer tutoring"
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </div>
+      </div>
     </div>
   );
 }

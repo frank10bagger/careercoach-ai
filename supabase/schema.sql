@@ -27,6 +27,8 @@ create table if not exists public.profiles (
 alter table public.profiles add column if not exists contact_email text;
 alter table public.profiles add column if not exists contact_phone text;
 alter table public.profiles add column if not exists contact_linkedin text;
+alter table public.profiles add column if not exists skills_text text;
+alter table public.profiles add column if not exists interests text;
 
 -- =========================================================================
 -- 2. EXPERIENCES — work history (one row per job)

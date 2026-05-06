@@ -8,6 +8,7 @@ type Chat = {
   contact_name: string;
   contact_role: string | null;
   company: string | null;
+  debrief_notes?: string | null;
   thank_you_email: string | null;
   created_at: string;
 };
@@ -21,6 +22,7 @@ export default function ThankYouWorkspace({ chats }: { chats: Chat[] }) {
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const router = useRouter();
 
   async function handleGenerate(e: React.FormEvent) {
@@ -150,16 +152,52 @@ export default function ThankYouWorkspace({ chats }: { chats: Chat[] }) {
       {chats.length > 0 && (
         <div className="pt-6 border-t border-slate-200">
           <h3 className="font-semibold text-slate-900 mb-3">Past coffee chats</h3>
+          <p className="text-xs text-slate-500 mb-3">Click any item to view the saved thank-you email.</p>
           <ul className="space-y-2">
-            {chats.map((c) => (
-              <li key={c.id} className="p-3 bg-white border border-slate-200 rounded-lg flex justify-between text-sm">
-                <span className="text-slate-700">
-                  {c.contact_name}
-                  {c.company && <span className="text-slate-400"> @ {c.company}</span>}
-                </span>
-                <span className="text-slate-400">{new Date(c.created_at).toLocaleDateString()}</span>
-              </li>
-            ))}
+            {chats.map((c) => {
+              const isOpen = openId === c.id;
+              return (
+                <li key={c.id} className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setOpenId(isOpen ? null : c.id)}
+                    className="w-full p-3 flex justify-between items-center text-sm hover:bg-slate-50 transition text-left"
+                  >
+                    <span className="text-slate-700 flex items-center gap-2">
+                      <span className={`text-slate-400 transition-transform ${isOpen ? 'rotate-90' : ''}`}>›</span>
+                      {c.contact_name}
+                      {c.company && <span className="text-slate-400 ml-1">@ {c.company}</span>}
+                    </span>
+                    <span className="text-slate-400 text-xs">{new Date(c.created_at).toLocaleDateString()}</span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-4 pb-4 pt-1 border-t border-slate-100 bg-slate-50/50">
+                      {c.thank_you_email && (
+                        <div className="mt-3">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-1.5">Thank-you email</p>
+                          <div className="p-3 bg-white border border-slate-200 rounded text-xs leading-relaxed whitespace-pre-wrap">
+                            {c.thank_you_email}
+                          </div>
+                          <button
+                            onClick={() => navigator.clipboard.writeText(c.thank_you_email || '')}
+                            className="mt-2 text-xs text-emerald-700 hover:underline"
+                          >
+                            Copy to clipboard
+                          </button>
+                        </div>
+                      )}
+                      {c.debrief_notes && (
+                        <div className="mt-3">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-1.5">Debrief notes</p>
+                          <div className="p-3 bg-white border border-slate-200 rounded text-xs leading-relaxed whitespace-pre-wrap text-slate-600 max-h-40 overflow-y-auto">
+                            {c.debrief_notes}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
