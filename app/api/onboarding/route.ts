@@ -11,13 +11,21 @@ export async function POST(req: Request) {
 
   const body = await req.json();
   const yearsExperience = parseInt(body.yearsExperience, 10) || 0;
+  const experiences: Array<{ company: string; title: string; start_date: string; end_date: string; raw_keywords: string }> = body.experiences || [];
+  const educations: Array<{ school: string; degree: string; field_of_study: string; graduation_year: string }> = body.educations || [];
+
+  // Build a brief topAchievements summary from raw keywords for backward compat
+  const topAchievements = experiences
+    .filter((e) => e.raw_keywords?.trim())
+    .map((e) => `${e.title} @ ${e.company}: ${e.raw_keywords}`)
+    .join('\n');
 
   const { system, user: userPrompt, mockResponse } = onboardingPrompt({
     presentRole: body.presentRole,
     yearsExperience,
     targetRole: body.targetRole,
     targetIndustry: body.targetIndustry,
-    topAchievements: body.topAchievements,
+    topAchievements,
     careerGap: body.careerGap,
   });
 
@@ -30,11 +38,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `AI classification failed: ${detail}` }, { status: 500 });
   }
 
-  let classification: { persona_type?: string; persona_reasoning?: string; summary?: string };
+  let classification: { persona_type?: string };
   try {
     classification = JSON.parse(raw);
   } catch {
-    // Best-effort fallback if Claude wrapped JSON in extra text
     const match = raw.match(/\{[\s\S]*\}/);
     classification = match ? JSON.parse(match[0]) : { persona_type: 'professional' };
   }
@@ -43,6 +50,7 @@ export async function POST(req: Request) {
     ? classification.persona_type
     : 'professional';
 
+  // Save profile
   const { error: updateError } = await supabase
     .from('profiles')
     .update({
@@ -51,7 +59,7 @@ export async function POST(req: Request) {
       years_experience: yearsExperience,
       target_role: body.targetRole,
       target_industry: body.targetIndustry,
-      top_achievements: body.topAchievements,
+      top_achievements: topAchievements,
       career_gap: body.careerGap,
       persona_type: personaType,
       onboarding_complete: true,
@@ -62,6 +70,37 @@ export async function POST(req: Request) {
   if (updateError) {
     console.error('profile update failed', updateError);
     return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  // Replace experiences (delete + insert)
+  await supabase.from('experiences').delete().eq('user_id', user.id);
+  if (experiences.length > 0) {
+    const expRows = experiences.map((e, i) => ({
+      user_id: user.id,
+      company: e.company,
+      title: e.title,
+      start_date: e.start_date,
+      end_date: e.end_date,
+      raw_keywords: e.raw_keywords,
+      position_order: i,
+    }));
+    const { error: expErr } = await supabase.from('experiences').insert(expRows);
+    if (expErr) console.error('experiences insert failed', expErr);
+  }
+
+  // Replace education
+  await supabase.from('education').delete().eq('user_id', user.id);
+  if (educations.length > 0) {
+    const eduRows = educations.map((e, i) => ({
+      user_id: user.id,
+      school: e.school,
+      degree: e.degree,
+      field_of_study: e.field_of_study,
+      graduation_year: e.graduation_year,
+      position_order: i,
+    }));
+    const { error: eduErr } = await supabase.from('education').insert(eduRows);
+    if (eduErr) console.error('education insert failed', eduErr);
   }
 
   await logAiCall({

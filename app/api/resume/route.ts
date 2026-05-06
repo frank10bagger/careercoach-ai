@@ -9,11 +9,26 @@ export async function POST() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  const [profileRes, expRes, eduRes] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('experiences').select('*').eq('user_id', user.id).order('position_order'),
+    supabase.from('education').select('*').eq('user_id', user.id).order('position_order'),
+  ]);
+
+  const profile = profileRes.data;
+  const experiences = (expRes.data ?? []).map((e) => ({
+    company: e.company || '',
+    title: e.title || '',
+    start_date: e.start_date || '',
+    end_date: e.end_date || '',
+    raw_keywords: e.raw_keywords || '',
+  }));
+  const educations = (eduRes.data ?? []).map((e) => ({
+    school: e.school || '',
+    degree: e.degree || '',
+    field_of_study: e.field_of_study || '',
+    graduation_year: e.graduation_year || '',
+  }));
 
   if (!profile?.onboarding_complete) {
     return NextResponse.json({ error: 'Complete onboarding before generating a resume' }, { status: 400 });
@@ -25,6 +40,8 @@ export async function POST() {
     yearsExperience: profile.years_experience || 0,
     targetRole: profile.target_role || '',
     targetIndustry: profile.target_industry || '',
+    experiences,
+    educations,
     topAchievements: profile.top_achievements || '',
     personaType: profile.persona_type || 'professional',
   });

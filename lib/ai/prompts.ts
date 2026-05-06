@@ -62,12 +62,17 @@ Classify and respond with JSON only.`;
 // =========================================================================
 // RESUME — generate tailored MBA-quality resume
 // =========================================================================
+type ExperienceInput = { company: string; title: string; start_date: string; end_date: string; raw_keywords: string };
+type EducationInput = { school: string; degree: string; field_of_study: string; graduation_year: string };
+
 export function resumePrompt(input: {
   fullName: string;
   presentRole: string;
   yearsExperience: number;
   targetRole: string;
   targetIndustry: string;
+  experiences: ExperienceInput[];
+  educations: EducationInput[];
   topAchievements: string;
   personaType: string;
 }) {
@@ -75,25 +80,48 @@ export function resumePrompt(input: {
 
 You generate MBA-quality, one-page resumes in plain text. Match the structure, tone, and bullet style of the example below.
 
+YOUR PRIMARY JOB: the candidate gives you raw keywords and numbers. You buff them up into properly worded, action-verb-led, quantified bullets that read like real Wharton MBA alumni resumes. Keywords like "$42M cost savings, 8-person team, fintech client" should become "Led 8-person team on cost optimization engagement for $1.5B fintech client; identified and implemented $42M in annual savings within 6 months."
+
 STRUCTURE:
-- Name, contact line
-- Optional one-paragraph EXECUTIVE SUMMARY (3-4 lines max)
-- EXPERIENCE: each role = company + location, title + dates, 4-6 bullets starting with strong action verbs and including QUANTIFIED impact
+- Name, contact line (use placeholders if no email/phone given)
+- Optional one-paragraph EXECUTIVE SUMMARY (3-4 lines, only if useful)
+- EXPERIENCE: each role = COMPANY NAME + Location, Title + Dates (right-aligned via spaces), 3-5 bullets per role
 - EDUCATION
-- ADDITIONAL INFORMATION (certifications, languages)
+- ADDITIONAL INFORMATION (only if relevant)
 
 RULES:
-- Every bullet starts with a verb (Led, Built, Reduced, Scaled, etc.)
-- Every bullet should have a numeric impact where reasonable ($, %, count, time)
+- Every bullet starts with a verb (Led, Built, Reduced, Scaled, Drove, Architected, etc.)
+- Every bullet should have NUMERIC impact where the input gives any numbers ($, %, count, time)
+- DO NOT fabricate numbers the candidate didn't provide. If they gave "increased revenue", buff to "Drove revenue growth" — not "Drove 47% revenue growth" unless they said 47%.
 - No first-person pronouns
-- Plain text, no markdown
+- Plain text only, no markdown asterisks or hashes
 - One page worth of content (≈30-40 lines)
+- Use 2+ spaces to align dates/locations to the right (the example shows the pattern)
 
 EXAMPLE FOR REFERENCE:
 ${RESUME_EXAMPLE_CONSULTING}`;
 
+  const expBlock = input.experiences.length > 0
+    ? input.experiences
+        .map((e, i) =>
+          `Job ${i + 1}:
+  Company: ${e.company}
+  Title: ${e.title}
+  Dates: ${e.start_date || '?'} – ${e.end_date || 'present'}
+  Keywords (buff these into ${e.raw_keywords ? '3-5' : '0'} bullets): ${e.raw_keywords || '(no detail given — skip bullets for this role or use [add detail])'}`
+        )
+        .join('\n\n')
+    : `(No experiences captured. Use the candidate's current role "${input.presentRole}" and the topAchievements field below as the source of bullets.)\n\nTop achievements: ${input.topAchievements || '(none)'}`;
+
+  const eduBlock = input.educations.length > 0
+    ? input.educations
+        .map((e) => `${e.degree}${e.field_of_study ? ' in ' + e.field_of_study : ''}, ${e.school}${e.graduation_year ? ' · ' + e.graduation_year : ''}`)
+        .join('\n')
+    : '(No education captured — use a single Wharton MBA placeholder line.)';
+
   const user = `Generate a tailored resume for this candidate:
 
+CANDIDATE
 Name: ${input.fullName}
 Current role: ${input.presentRole}
 Years of experience: ${input.yearsExperience}
@@ -101,34 +129,24 @@ Target role: ${input.targetRole}
 Target industry: ${input.targetIndustry}
 Persona: ${input.personaType}
 
-Top achievements (use these as the basis for bullets, expanding with realistic detail):
-${input.topAchievements}
+WORK HISTORY (oldest to most recent — but render most-recent first in the resume):
+${expBlock}
 
-Tailor language and emphasis toward the target role. If specific dates or company names are missing, use placeholders like [Company Name] and [Dates] for the user to fill in.`;
+EDUCATION:
+${eduBlock}
 
-  const mockResponse = `(MOCK RESUME — replace MOCK_AI=false in env to use real Claude)
+Tailor language and emphasis toward the target role. Use the keywords I gave you to write proper bullets — do not just echo my keywords as-is. Where I gave numbers, preserve them; do not invent numbers I didn't provide.`;
+
+  const mockResponse = `(MOCK RESUME — set MOCK_AI=false to use real Claude)
 
 ${input.fullName.toUpperCase()}
 [email] | [phone] | linkedin.com/in/[handle]
 
-EXECUTIVE SUMMARY
-${input.presentRole} with ${input.yearsExperience} years of experience, targeting ${input.targetRole} roles in ${input.targetIndustry}. Track record of [achievement category from your top achievements].
-
 EXPERIENCE
-[CURRENT COMPANY]                                                          [Location]
-${input.presentRole}                                                        [Dates]
-- Led [achievement 1 from your input — expanded with numeric impact]
-- Built [achievement 2 — expanded]
-- Drove [achievement 3 — expanded]
-- Managed [add team/budget/scope detail]
+${input.experiences.map((e) => `${e.company.toUpperCase()}                                                          [Location]\n${e.title}                                                                  ${e.start_date || ''} – ${e.end_date || 'Present'}\n- (Buffed bullet from: ${e.raw_keywords || 'no keywords given'})\n`).join('\n')}
 
 EDUCATION
-THE WHARTON SCHOOL, UNIVERSITY OF PENNSYLVANIA                             Philadelphia, PA
-Master of Business Administration                                           [Year]
-
-ADDITIONAL INFORMATION
-Languages: [list]
-Certifications: [list]`;
+${input.educations.map((e) => `${e.school.toUpperCase()}                                                          ${e.graduation_year || ''}\n${e.degree}${e.field_of_study ? ' in ' + e.field_of_study : ''}`).join('\n\n')}`;
 
   return { system, user, mockResponse };
 }

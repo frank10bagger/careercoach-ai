@@ -22,7 +22,7 @@ create table if not exists public.profiles (
 );
 
 -- =========================================================================
--- 2. EXPERIENCES — work history
+-- 2. EXPERIENCES — work history (one row per job)
 -- =========================================================================
 create table if not exists public.experiences (
   id uuid primary key default gen_random_uuid(),
@@ -31,10 +31,36 @@ create table if not exists public.experiences (
   title text,
   start_date text,
   end_date text,
+  raw_keywords text,
   achievements text,
   skills text,
+  position_order integer default 0,
   created_at timestamptz default now()
 );
+
+-- Idempotent migration for existing tables (Postgres doesn't error on ADD COLUMN IF NOT EXISTS)
+alter table public.experiences add column if not exists raw_keywords text;
+alter table public.experiences add column if not exists position_order integer default 0;
+
+-- =========================================================================
+-- 2b. EDUCATION — degrees / schools (one row per entry)
+-- =========================================================================
+create table if not exists public.education (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  school text,
+  degree text,
+  field_of_study text,
+  graduation_year text,
+  honors text,
+  position_order integer default 0,
+  created_at timestamptz default now()
+);
+
+alter table public.education enable row level security;
+drop policy if exists "own education" on public.education;
+create policy "own education" on public.education for all
+  using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 
 -- =========================================================================
 -- 3. SKILLS — hard/soft/leadership
