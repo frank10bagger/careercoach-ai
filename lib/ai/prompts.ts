@@ -81,7 +81,7 @@ export function resumePrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
-You generate professional one-page resumes in plain text for undergraduate students applying to internships and first full-time roles. The example below shows the STRUCTURE and BULLET STYLE — copy that style, but scale seniority to whatever the candidate provides. A college sophomore who interned at a startup gets shorter, more modest bullets than a 10-year executive.
+You generate professional one-page resumes in plain text. The candidate could be an undergraduate student going for internships, a working professional aiming for a step-up, or a career switcher pivoting industries. The example below shows the STRUCTURE and BULLET STYLE — copy that style, but scale seniority to whatever the candidate provides. A college sophomore who interned at a startup gets shorter, more modest bullets than a 10-year executive.
 
 YOUR PRIMARY JOB: the candidate gives you raw keywords and numbers. You buff them up into properly worded, action-verb-led, quantified bullets. Keywords like "data analysis SQL, automated weekly reports saved 5 hours/week, 3 stakeholder presentations" should become "Built SQL-based reporting automation that reduced weekly analyst time by 5 hours; presented findings to 3 senior stakeholders driving operational decisions."
 
@@ -102,7 +102,7 @@ ABSOLUTE RULES — VIOLATIONS WILL RUIN THE OUTPUT:
 7. Plain text only. No markdown. No asterisks for bold. No hashes for headers. Use 2+ spaces to right-align text.
 8. Output ONLY the resume — no explanation, no "Here is your resume", no closing notes.
 
-EXAMPLE (note: this is an MBA executive — for an undergrad student, scale bullets DOWN to internship-appropriate language and length):
+EXAMPLE (note: this is a senior executive resume — for an undergrad student or junior professional, scale bullets DOWN to appropriate length and seniority):
 ${RESUME_EXAMPLE_CONSULTING}`;
 
   const expBlock = input.experiences.length > 0
@@ -148,7 +148,7 @@ ${expBlock}
 EDUCATION — render in resume in REVERSE CHRONOLOGICAL ORDER:
 ${eduBlock}
 
-Generate the resume now. Use ONLY the data above. Do not invent companies, dates, locations, schools, or degrees. Do not include an EXECUTIVE SUMMARY for an undergraduate; it's optional for senior candidates only.`;
+Generate the resume now. Use ONLY the data above. Do not invent companies, dates, locations, schools, or degrees. EXECUTIVE SUMMARY is optional — include it only for senior candidates with significant experience.`;
 
   const mockContactLine = contactPieces.length > 0 ? contactPieces.join(' | ') : '';
   const mockResponse = `(MOCK RESUME — set MOCK_AI=false to use real Claude)

@@ -187,7 +187,7 @@ function Welcome() {
         Hi 👋 I&apos;m your AI career coach.
       </h2>
       <p className="text-slate-600 leading-relaxed mb-3">
-        Built for undergraduate students figuring out internships and first full-time roles. I&apos;ll ask a few questions about your background and goals — takes about 3 minutes.
+        Built for undergraduate students, working professionals, and career switchers. I&apos;ll ask a few questions about your background and where you want to go next — takes about 3 minutes.
       </p>
       <p className="text-slate-600 leading-relaxed">
         For your work and education, just give me <span className="font-medium text-slate-900">keywords and numbers</span>. I&apos;ll do the heavy lifting and turn them into proper resume bullets when you generate your resume.
@@ -264,13 +264,13 @@ function NameStep({ value, onChange }: { value: string; onChange: (v: string) =>
 function PresentRoleStep({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <QuestionHeader ai="What do you do today?" hint="Your year and major if you're a student, or your current job title and company if you're working." />
+      <QuestionHeader ai="What do you do today?" hint="Your present job title and company. Or 'undergraduate at Wharton' if you're in school." />
       <input
         autoFocus
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g. Sophomore, Computer Science at Wharton"
+        placeholder="e.g. Senior Consultant at Bain & Company"
         className="w-full px-4 py-3 text-lg border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
       />
     </div>
@@ -280,7 +280,7 @@ function PresentRoleStep({ value, onChange }: { value: string; onChange: (v: str
 function YearsStep({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <QuestionHeader ai="How many years of work experience do you have?" hint="Internships count too. Just a rough number — 0 is fine." />
+      <QuestionHeader ai="How many years of full-time work experience do you have?" hint="Round to the nearest year. Internships don't count." />
       <input
         autoFocus
         type="number"
@@ -288,7 +288,7 @@ function YearsStep({ value, onChange }: { value: string; onChange: (v: string) =
         max="50"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="0"
+        placeholder="4"
         className="w-full px-4 py-3 text-lg border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
       />
     </div>
@@ -335,8 +335,8 @@ function ExperienceStep({ items, setItems }: { items: Experience[]; setItems: (e
   return (
     <div>
       <QuestionHeader
-        ai="Tell me about your work experience."
-        hint="Add each job or internship. For accomplishments, just type keywords and numbers — AI will buff them up later."
+        ai="Now tell me about your work experience."
+        hint="Add each job. For accomplishments, just type keywords and numbers — AI will buff them up later."
       />
 
       {items.length > 0 && (
@@ -437,7 +437,7 @@ function EducationStep({ items, setItems }: { items: Education[]; setItems: (e: 
 
   return (
     <div>
-      <QuestionHeader ai="Tell me about your education." hint="Add each degree — high school (if relevant), undergrad, exchange programs, certificates." />
+      <QuestionHeader ai="Tell me about your education." hint="Add each degree — undergrad, graduate, professional certifications." />
 
       {items.length > 0 && (
         <ul className="space-y-2 mb-4">
@@ -490,13 +490,13 @@ function EducationStep({ items, setItems }: { items: Education[]; setItems: (e: 
 function TargetRoleStep({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div>
-      <QuestionHeader ai="What role do you want next?" hint="Be specific. 'Software Engineer Intern' beats 'a tech job'." />
+      <QuestionHeader ai="What role do you want next?" hint="Be specific. 'Senior Product Manager' beats 'a tech job'." />
       <input
         autoFocus
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="e.g. Software Engineer Intern"
+        placeholder="e.g. Senior Product Manager"
         className="w-full px-4 py-3 text-lg border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
       />
     </div>

@@ -15,11 +15,11 @@ export default async function HomePage() {
       <div className="max-w-2xl w-full text-center">
         <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-4">CareerCoach AI</h1>
         <p className="text-xl md:text-2xl text-slate-600 mb-2">
-          AI career mentor for undergraduate students.
+          Your persistent AI career mentor.
         </p>
         <p className="text-base text-slate-500 mb-10">
           From self-discovery to signed offer — resume, cover letter, and thank-you email,
-          tailored to who you are and the internships and roles you want.
+          tailored to who you are and what you want.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
