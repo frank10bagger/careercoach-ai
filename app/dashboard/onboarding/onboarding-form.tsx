@@ -3,6 +3,31 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+const CHEERS = ['Nice!', 'Great!', 'Got it!', 'Awesome!', "Let's keep going!", 'Almost there!', 'Last one!'];
+
+async function fireConfetti(intensity: 'small' | 'big' = 'small') {
+  const confetti = (await import('canvas-confetti')).default;
+  if (intensity === 'small') {
+    confetti({
+      particleCount: 18,
+      spread: 50,
+      ticks: 60,
+      origin: { y: 0.35 },
+      colors: ['#10b981', '#34d399', '#6ee7b7'],
+      disableForReducedMotion: true,
+    });
+  } else {
+    confetti({
+      particleCount: 50,
+      spread: 70,
+      ticks: 80,
+      origin: { y: 0.5 },
+      colors: ['#10b981', '#34d399', '#6ee7b7', '#f59e0b'],
+      disableForReducedMotion: true,
+    });
+  }
+}
+
 type Experience = { company: string; title: string; location: string; start_date: string; end_date: string; raw_keywords: string };
 type Education = { school: string; degree: string; field_of_study: string; start_year: string; graduation_year: string };
 
@@ -39,7 +64,21 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [educations, setEducations] = useState<Education[]>([]);
 
-  const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
+  const [cheer, setCheer] = useState<string | null>(null);
+
+  function next() {
+    setStep((s) => {
+      const newStep = Math.min(s + 1, TOTAL_STEPS);
+      if (s > 0 && s < TOTAL_STEPS) {
+        // Celebrate forward progress (not on the welcome → step 1 transition)
+        fireConfetti('small');
+        const cheerText = CHEERS[Math.min(s - 1, CHEERS.length - 1)];
+        setCheer(cheerText);
+        setTimeout(() => setCheer(null), 800);
+      }
+      return newStep;
+    });
+  }
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   async function handleSubmit() {
@@ -67,8 +106,12 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
       setError(error || 'Save failed');
       return;
     }
-    router.push('/dashboard');
-    router.refresh();
+    fireConfetti('big');
+    setCheer('Profile saved 🎉');
+    setTimeout(() => {
+      router.push('/dashboard');
+      router.refresh();
+    }, 600);
   }
 
   function canAdvance(): boolean {
@@ -86,7 +129,12 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
   }
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200">
+    <div className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200 relative">
+      {cheer && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500 text-white text-xs font-medium rounded-full shadow-md animate-[fadeIn_0.2s_ease-out]">
+          {cheer}
+        </div>
+      )}
       <ProgressBar current={step} total={TOTAL_STEPS} />
 
       <div className="min-h-[280px] mt-6">
