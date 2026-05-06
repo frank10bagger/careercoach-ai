@@ -41,11 +41,6 @@ export default async function DashboardLayout({
           <p className="text-sm font-semibold text-slate-900 truncate">
             {profile?.full_name || user.email}
           </p>
-          {profile?.persona_type && (
-            <span className="inline-block mt-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-medium rounded-full">
-              {personaLabel[profile.persona_type]}
-            </span>
-          )}
         </div>
 
         <nav className="flex-1 space-y-0.5">
