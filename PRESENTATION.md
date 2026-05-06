@@ -9,9 +9,9 @@
 
 ## Slide 1 — User Guide (REQUIRED FIRST SLIDE)
 
-### CareerTwin
+### CareerTwin — the digital twin for your career management
 
-> Your AI career mentor for undergrads — from self-discovery to signed offer.
+> Your fragmented career information becomes one living memory layer. You enter your background once. Every AI feature reuses it.
 
 **Live URL:** https://careercoach-ai-phi.vercel.app
 
@@ -20,16 +20,17 @@
 2. Enter name, email, password
 3. You're in — no email verification needed
 
-**4 features. One persistent profile.**
+**5 surfaces. One persistent profile.**
 
 | Feature | Input | Output |
 |---|---|---|
-| Onboarding | 9-step Q&A: name, contact, role, work history (multi-job), education, target | Persona + saved profile |
-| Resume Builder | Just click Generate | Tailored resume → Publish → download PDF |
-| Cover Letter | Job description + company | 350-450 word personalized letter |
-| Thank-you Email | Debrief notes from a coffee chat | Email referencing actual topics discussed |
+| Onboarding | 8-step conversational Q&A | Persona + saved profile (powers everything below) |
+| Resume | Click Generate | One-page MBA-style resume → Publish → Download PDF |
+| Cover letter | JD + company | 350-450 word personalized letter |
+| Thank-you email | Coffee-chat debrief notes | Email referencing actual topics discussed |
+| Career highlights | One sentence about a milestone | LinkedIn post + resume bullet (auto-flows to resume) |
 
-**Built with:** Next.js · Supabase · Anthropic Claude Sonnet 4.6 · Vercel
+**Built with:** Next.js 16 · Supabase (Postgres + RLS) · Anthropic Claude Sonnet 4.6 · Vercel · jsPDF
 
 ---
 
@@ -120,28 +121,33 @@ Every Claude call ships with a **safety preamble** that:
 
 ---
 
-## Slide 7 — Build Reflection (1 min — REQUIRED 5 PTS)
+## Slide 7 — Build Reflection (2 min — REQUIRED 5 PTS)
 
 ### What worked
-1. **Stage-prompted build** — auth → DB → 1 feature at a time → polish. We always had something working.
+1. **Stage-prompted build** — auth → DB → one feature at a time → polish. We always had something working.
 2. **Few-shot examples in every prompt** — pulled from Wharton's real alumni resume bank. Output quality jumped immediately.
 3. **Mock mode during dev (`MOCK_AI=true`)** — let us iterate UI without burning Anthropic credits.
 
-### What broke (and how we fixed it)
-1. **First Claude call hit HTTP 529 "Overloaded"** → added auto-retry with exponential backoff (1s, 2s, 4s).
-2. **Resume hallucinated MBA when user typed Bachelor** → strengthened prompt with explicit "DO NOT FABRICATE EDUCATION" rules + structured input format.
-3. **Print-to-PDF butchered the layout** → replaced `window.print()` with direct PDF generation via `jsPDF` + `html2canvas`.
+### What didn't work (first time around)
+1. **`current_role` as a Postgres column** — reserved keyword. Migration failed.
+2. **Print-to-PDF for the resume** — Chrome's print dialog leaked the dashboard sidebar into the PDF. Ugly.
+3. **Single-form onboarding** — felt cold and clinical. Users skimmed past the whole thing.
 
-### What surprised us
-- Tailwind 4's `oklch()` colors broke `html2canvas` capture — had to inline hex colors in the resume preview component.
-- Postgres rejects `current_role` as a column name (it's a reserved keyword for `current_user`).
+### What we tried that AMAZED us
+- **Server-side merging of career highlights into experiences** — instead of asking Claude to weave them in, we mutate the experience object server-side (title progression, keyword append). Claude then generates a resume from one unified profile. The promotion auto-updates everything: title line, exec summary, target-role positioning. **No prompt-engineering gymnastics — just better data structure.**
+- **Conversational onboarding with a chat-style AI avatar** — same data the form would collect, but felt like talking to a person. Confetti + cheer text on each Next click made it actually *fun* to fill out a 9-step form.
 
-### What AI got right (3) vs. what we fixed manually (2)
-- ✅ Routed Supabase auth + RLS scaffolding correctly first try
-- ✅ Generated all 4 prompt templates with safety guardrails baked in
-- ✅ Built the conversational onboarding state machine in one shot
+### How many iterations to be happy
+- **Resume output**: ~12 prompt iterations. The breakthrough was treating the few-shot example as STRUCTURE (not content) and adding hard "DO NOT FABRICATE" rules.
+- **PDF generation**: 4 iterations. v1 was `window.print()` (bad). v2 added html2canvas + jsPDF. v3 fixed Tailwind 4 oklch incompatibility with inline hex. v4 forced one-page fit by stretching to 8.5×11.
+- **Career highlight prompt**: 5 iterations to land the right balance of "buff up" vs. "don't fabricate" + "one event in, full story out".
+
+### 3 things AI got right · 2 things we fixed manually
+- AI: Supabase auth + RLS scaffolding compiled first try
+- AI: Generated all 5 prompt templates with safety guardrails baked in
+- AI: Built the conversational onboarding state machine in one shot
 - 🛠️ Manual: fixed model name (`claude-sonnet-4-5` → `claude-sonnet-4-6`)
-- 🛠️ Manual: rewrote resume preview with inline styles to satisfy html2canvas
+- 🛠️ Manual: rewrote resume preview with inline hex colors to satisfy html2canvas
 
 ---
 
