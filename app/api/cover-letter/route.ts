@@ -38,6 +38,7 @@ export async function POST(req: Request) {
   const { system, user: userPrompt, mockResponse } = coverLetterPrompt({
     fullName: profile.full_name || 'Candidate',
     presentRole: profile.present_role || '',
+    yearsExperience: profile.years_experience || 0,
     targetRole: profile.target_role || '',
     resumeContent: latestResume.content_text,
     company,

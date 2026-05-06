@@ -170,6 +170,7 @@ ${input.educations.map((e) => `${e.school.toUpperCase()}                        
 export function coverLetterPrompt(input: {
   fullName: string;
   presentRole: string;
+  yearsExperience: number;
   targetRole: string;
   resumeContent: string;
   company: string;
@@ -178,7 +179,7 @@ export function coverLetterPrompt(input: {
 }) {
   const system = `${SAFETY_PREAMBLE}
 
-You write MBA-quality cover letters. The letter should:
+You write professional cover letters. The letter should:
 - Open with a hook that ties the candidate's background or motivation to the company's mission
 - Have 3 themed paragraphs, each highlighting one transferable skill with a SPECIFIC, QUANTIFIED example from the candidate's resume
 - Close with a call to a conversation
@@ -186,7 +187,14 @@ You write MBA-quality cover letters. The letter should:
 - Use a professional but warm tone
 - NO clichés ("I am writing to apply for...", "I am a hard worker...", "team player")
 
-EXAMPLE FOR REFERENCE:
+ABSOLUTE RULES — VIOLATIONS WILL DISQUALIFY THE OUTPUT:
+1. USE THE EXACT YEARS OF EXPERIENCE GIVEN. If the candidate has 4 years, do NOT write "six years" or "nearly a decade" — write "four years" (or just don't quote a number).
+2. USE THE EXACT JOB TITLE FROM THE APPLICATION. Do NOT inflate "Product Manager" to "Senior Product Manager" or "Lead Product Manager" if the candidate didn't apply for that title.
+3. IF THERE IS A SENIORITY GAP (job requires more experience than candidate has), ACKNOWLEDGE IT HONESTLY: position the candidate as transitioning into the field, leveraging transferable skills. Don't pretend the gap doesn't exist.
+4. DO NOT INVENT new experiences, skills, or numbers that aren't in the resume. Only buff the language around what's already there.
+5. If the candidate is in school or has a non-traditional path, write the letter in a way that owns that — don't disguise it.
+
+EXAMPLE FOR REFERENCE (illustrative tone, not factual content):
 ${COVER_LETTER_EXAMPLE}`;
 
   const user = `Write a cover letter for this candidate.
@@ -194,17 +202,18 @@ ${COVER_LETTER_EXAMPLE}`;
 CANDIDATE
 Name: ${input.fullName}
 Current role: ${input.presentRole}
+Total years of full-time experience: ${input.yearsExperience} (use THIS number — do not inflate)
 Target role: ${input.targetRole}
 
-RESUME (use bullets from here as evidence):
+RESUME (use bullets from here as factual evidence — do not add anything not in here):
 ${input.resumeContent}
 
 JOB
 Company: ${input.company}
-Title: ${input.jobTitle}
+Title applied for: ${input.jobTitle} (use THIS exact title — do not inflate to Senior/Lead/etc.)
 Description: ${input.jobDescription}
 
-Write the letter. Use specific, quantified examples drawn from the resume. Tailor opening hook to the company.`;
+Write the letter using only the candidate's actual background. If the JD asks for more experience than the candidate has, position them as someone transitioning into the role with relevant transferable skills, not as someone who already has the seniority.`;
 
   const mockResponse = `(MOCK COVER LETTER — flip MOCK_AI=false to use real Claude)
 
