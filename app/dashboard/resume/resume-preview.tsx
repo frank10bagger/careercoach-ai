@@ -47,8 +47,10 @@ export default function ResumePreview({ content }: { content: string }) {
         fontFamily: '"Calibri", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
         fontSize: 14.5,
         lineHeight: 1.5,
-        maxWidth: 850,
+        width: 850,
+        minHeight: 1100, // matches 8.5:11 letter aspect ratio so PDF doesn't distort
         margin: '0 auto',
+        boxSizing: 'border-box',
       }}
     >
       {name && (

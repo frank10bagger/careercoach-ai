@@ -131,6 +131,24 @@ create table if not exists public.coffee_chats (
 );
 
 -- =========================================================================
+-- 6b. CAREER_HIGHLIGHTS — accomplishment moments → LinkedIn post + resume bullet
+-- =========================================================================
+create table if not exists public.career_highlights (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  highlight_date text,
+  raw_description text not null,
+  linkedin_post text,
+  resume_bullet text,
+  created_at timestamptz default now()
+);
+
+alter table public.career_highlights enable row level security;
+drop policy if exists "own highlights" on public.career_highlights;
+create policy "own highlights" on public.career_highlights for all
+  using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+
+-- =========================================================================
 -- 7. INTERVIEW_PREPS — placeholder for stretch feature
 -- =========================================================================
 create table if not exists public.interview_preps (

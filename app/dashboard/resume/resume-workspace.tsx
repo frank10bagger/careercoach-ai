@@ -51,30 +51,17 @@ export default function ResumeWorkspace({
       import('jspdf'),
     ]);
     const canvas = await html2canvas(element, {
-      scale: 3,                  // 3x for retina-sharp
+      scale: 3,
       backgroundColor: '#ffffff',
       useCORS: true,
       logging: false,
       windowWidth: element.scrollWidth,
     });
-    // PNG keeps text crisp (vs JPEG compression artifacts on small fonts)
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter', compress: true });
-    const pageWidth = 8.5;
-    const pageHeight = 11;
-    const margin = 0;            // resume already has internal padding; no extra margin
-    const usableWidth = pageWidth - 2 * margin;
-    const imgHeight = (canvas.height * usableWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = margin;
-    pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight, undefined, 'FAST');
-    heightLeft -= pageHeight - 2 * margin;
-    while (heightLeft > 0) {
-      position = -(imgHeight - heightLeft) + margin;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight, undefined, 'FAST');
-      heightLeft -= pageHeight - 2 * margin;
-    }
+    // Always fit to exactly one page — fills full 8.5x11 page.
+    // The internal padding of the resume preview gives it natural margins; no PDF margin needed.
+    pdf.addImage(imgData, 'PNG', 0, 0, 8.5, 11, undefined, 'FAST');
     pdf.save(`resume-${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 

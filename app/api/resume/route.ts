@@ -9,13 +9,17 @@ export async function POST() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-  const [profileRes, expRes, eduRes] = await Promise.all([
+  const [profileRes, expRes, eduRes, hlRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('experiences').select('*').eq('user_id', user.id).order('position_order'),
     supabase.from('education').select('*').eq('user_id', user.id).order('position_order'),
+    supabase.from('career_highlights').select('resume_bullet, highlight_date').eq('user_id', user.id).order('created_at', { ascending: false }),
   ]);
 
   const profile = profileRes.data;
+  const highlights = (hlRes.data ?? [])
+    .filter((h) => h.resume_bullet)
+    .map((h) => ({ resume_bullet: h.resume_bullet || '', highlight_date: h.highlight_date || '' }));
   const experiences = (expRes.data ?? []).map((e) => ({
     company: e.company || '',
     title: e.title || '',
@@ -49,6 +53,7 @@ export async function POST() {
     interests: profile.interests || '',
     experiences,
     educations,
+    highlights,
     topAchievements: profile.top_achievements || '',
     personaType: profile.persona_type || 'professional',
   });

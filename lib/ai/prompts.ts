@@ -78,6 +78,7 @@ export function resumePrompt(input: {
   interests: string;
   experiences: ExperienceInput[];
   educations: EducationInput[];
+  highlights: Array<{ resume_bullet: string; highlight_date: string }>;
   topAchievements: string;
   personaType: string;
 }) {
@@ -87,10 +88,13 @@ You generate professional one-page resumes in plain text. The candidate could be
 
 YOUR PRIMARY JOB: the candidate gives you raw keywords. You buff them into proper resume bullets that read like real Wharton MBA alumni resumes. Keywords like "data analysis SQL, automated weekly reports" become "Built SQL-based reporting automation that reduced weekly analyst time by ~5 hours, freeing the team to focus on higher-value strategic analysis."
 
-CRITICAL — FILL THE PAGE. A half-empty resume looks unprofessional. If the candidate gives you sparse keywords, expand generously:
+CRITICAL — TARGET EXACTLY ONE FULL PAGE. Not 0.7 page. Not 1.2 pages. ONE FULL PAGE of standard US Letter at ~14.5pt Calibri with 1.5 line height. That's roughly 35-45 lines of content total.
+
+If the candidate gives you sparse keywords, expand generously to fill the page:
 - Always write 3-5 bullets per role (more for senior roles, 3 for junior internships).
-- Always include an EXECUTIVE SUMMARY (3-4 lines) tailored to the target role and pulling threads from their work history.
-- For sparse keywords, INFER reasonable role-typical activities tied to the title. A "Consultant at McKinsey" can reasonably "led client-facing analyses", "synthesized cross-functional inputs into recommendations", "presented findings to senior client stakeholders" — even without explicit keywords. These are reasonable inferences from the role title, NOT fabrications.
+- Always include an EXECUTIVE SUMMARY (3-4 lines) tailored to the target role.
+- For sparse keywords, INFER reasonable role-typical activities tied to the title. A "Consultant at McKinsey" can reasonably "led client-facing analyses", "synthesized cross-functional inputs into recommendations" — even without explicit keywords. These are reasonable role inferences, NOT fabrications.
+- If the candidate has many roles or lots of detail, TIGHTEN to fit one page — drop the weakest bullets, shorten verbose ones.
 - The line between buffing and fabricating: you may infer ACTIVITIES typical to the role/title; you may NOT invent specific NUMBERS, COMPANIES, CLIENTS, or OUTCOMES the candidate didn't mention.
 
 STRUCTURE (always include these sections):
@@ -158,11 +162,16 @@ ${expBlock}
 EDUCATION — render in resume in REVERSE CHRONOLOGICAL ORDER:
 ${eduBlock}
 
+CAREER HIGHLIGHTS (user-saved bullets to weave into the most relevant job's bullet list):
+${input.highlights.length > 0
+  ? input.highlights.map((h, i) => `Highlight ${i + 1}${h.highlight_date ? ' (' + h.highlight_date + ')' : ''}: ${h.resume_bullet}`).join('\n')
+  : '(none — skip)'}
+
 ADDITIONAL INFORMATION — populate from these (skip section only if both blank):
 - Skills: ${input.skills || '(none provided)'}
 - Interests: ${input.interests || '(none provided)'}
 
-Generate the resume now. ALWAYS include an EXECUTIVE SUMMARY at the top tailored to the target role. Write 3-5 bullets per role to fill the page — for sparse keywords, infer reasonable role-typical activities (without inventing specific numbers, clients, or outcomes the candidate didn't mention). If skills/interests provided, render them as "Skills: X, Y, Z" and "Interests: X, Y, Z" lines under ADDITIONAL INFORMATION. Aim for a full one-page resume.`;
+Generate the resume now. ALWAYS include an EXECUTIVE SUMMARY at the top tailored to the target role. Write 3-5 bullets per role to fill the page — for sparse keywords, infer reasonable role-typical activities (without inventing specific numbers, clients, or outcomes the candidate didn't mention). For CAREER HIGHLIGHTS, weave each into the bullet list of the role it most likely belongs to (using the date if provided, else the most recent job). If a highlight doesn't clearly belong to any specific job, add it under the most recent role. If skills/interests provided, render them as "Skills: X, Y, Z" and "Interests: X, Y, Z" lines under ADDITIONAL INFORMATION. Aim for a full one-page resume.`;
 
   const mockContactLine = contactPieces.length > 0 ? contactPieces.join(' | ') : '';
   const mockResponse = `(MOCK RESUME — set MOCK_AI=false to use real Claude)
@@ -174,6 +183,69 @@ ${input.experiences.map((e) => `${e.company.toUpperCase()}                      
 
 EDUCATION
 ${input.educations.map((e) => `${e.school.toUpperCase()}                                                          ${e.start_year && e.graduation_year ? `${e.start_year} – ${e.graduation_year}` : e.graduation_year || ''}\n${e.degree}${e.field_of_study ? ' in ' + e.field_of_study : ''}`).join('\n\n')}`;
+
+  return { system, user, mockResponse };
+}
+
+// =========================================================================
+// CAREER HIGHLIGHT — generate LinkedIn post + resume bullet from one input
+// =========================================================================
+export function highlightPrompt(input: {
+  fullName: string;
+  presentRole: string;
+  targetRole: string;
+  highlightDate: string;
+  rawDescription: string;
+}) {
+  const system = `${SAFETY_PREAMBLE}
+
+You generate TWO artifacts from a single career-highlight description: a polished LinkedIn post and a tight resume bullet.
+
+LINKEDIN POST format:
+- 5-8 short paragraphs (1-2 sentences each)
+- Opens with a specific hook (something concrete the candidate did, not a cliche)
+- Adds context (why it mattered, who was involved)
+- Includes a quantified or specific outcome where the user provided one
+- Optional: brief reflection or lesson learned
+- Optional: gratitude to teammates / mentors if mentioned in input
+- Ends with 2-3 relevant hashtags
+- 150-300 words total
+- Tone: professional but human, occasional first-person ("I", "we"), readable on a phone scroll
+
+RESUME BULLET format:
+- ONE single bullet line
+- Starts with a strong action verb (Led, Built, Drove, Designed, Architected, etc.)
+- Includes a quantified outcome if the user gave one
+- 20-35 words
+- NO first-person pronouns
+
+ABSOLUTE RULES:
+- Do NOT invent numbers, names, companies, or outcomes the user didn't mention
+- Do NOT include "#humbled" or "#blessed" — keep it grounded
+- If the date is given, the LinkedIn post may reference recency naturally ("last week", "this month") only if the date is recent
+- Output JSON ONLY, in this exact shape, no other text:
+{
+  "linkedin_post": "<full post with line breaks as \\n>",
+  "resume_bullet": "<single bullet>"
+}`;
+
+  const user = `Generate a LinkedIn post and a resume bullet for this career highlight.
+
+CANDIDATE
+Name: ${input.fullName}
+Today's role: ${input.presentRole}
+Target role: ${input.targetRole}
+
+HIGHLIGHT
+Date: ${input.highlightDate || '(not specified)'}
+Raw description (the user typed this): ${input.rawDescription}
+
+Buff the description into the two artifacts. Use ONLY facts from the description.`;
+
+  const mockResponse = JSON.stringify({
+    linkedin_post: `(MOCK) Excited to share that ${input.rawDescription}\n\nThis was a meaningful milestone because [reflection].\n\nGrateful to my team for the support along the way.\n\n#CareerGrowth #${(input.targetRole || 'Career').replace(/\s+/g, '')}`,
+    resume_bullet: `(MOCK) Achieved milestone: ${input.rawDescription.slice(0, 100)}`,
+  });
 
   return { system, user, mockResponse };
 }
