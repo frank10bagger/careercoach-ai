@@ -2,7 +2,7 @@
 
 **Live URL:** https://careercoach-ai-phi.vercel.app
 
-A persistent AI career mentor for MBA students, early-career professionals, and career switchers. From self-discovery to signed offer — resume, cover letter, and thank-you email, tailored to who you are and what you want.
+A persistent AI career mentor for **undergraduate students**. From self-discovery to signed offer — resume, cover letter, and thank-you email, tailored to who you are and the internships and roles you want.
 
 ---
 
@@ -23,8 +23,8 @@ Five pages, four AI features, one persistent profile:
 
 | Feature | What you give | What you get | Saved as |
 |---|---|---|---|
-| **Onboarding** | 6 questions about your role, goals, and achievements | A persona classification (Student / Professional / Career Switcher) and a saved profile | `profiles` table |
-| **Resume** | Click "Generate" — uses your stored profile | An MBA-quality, one-page resume in the Wharton alumni-resume style | `resumes` table (versioned) |
+| **Onboarding** | 9-step Q&A: name, contact info, role, work history (multi-job), education, target role/industry | A persona classification (Student / Professional / Career Switcher) and a saved profile | `profiles` + `experiences` + `education` tables |
+| **Resume** | Click "Generate" — uses your stored profile | A one-page resume styled after the Wharton alumni-resume bank, with **Publish → Download PDF** | `resumes` table (versioned) |
 | **Cover letter** | Company name, job title, full job description | A 350–450 word cover letter referencing both the JD and your resume | `applications` table |
 | **Thank-you email** | Contact name, role, company, debrief notes | A personalized thank-you email referencing the actual topics you discussed | `coffee_chats` table |
 
