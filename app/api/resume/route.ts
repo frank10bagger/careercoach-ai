@@ -4,6 +4,44 @@ import { generate } from '@/lib/ai/anthropic';
 import { resumePrompt } from '@/lib/ai/prompts';
 import { logAiCall } from '@/lib/ai/audit';
 
+// Defensive: if Claude prepended any explanatory prose ("I need to flag...", "Note:", "---"),
+// drop everything before the first plausible name line (a short line, mostly letters,
+// not starting with common preamble phrases).
+function stripPreamble(content: string): string {
+  const lines = content.split('\n');
+  const PREAMBLE_HINTS = [
+    /^i (need|cannot|will not|won't)\b/i,
+    /^note[:\s]/i,
+    /^here is\b/i,
+    /^---+$/,
+    /^before generating/i,
+    /^the (career|resume|highlight) /i,
+  ];
+  const isPreamble = (line: string) => PREAMBLE_HINTS.some((re) => re.test(line.trim()));
+  const looksLikeName = (line: string) => {
+    const t = line.trim();
+    if (!t || t.length > 60) return false;
+    // 1-5 words, mostly letters, not ending with period (sentences)
+    if (t.endsWith('.') || t.endsWith(':')) return false;
+    const words = t.split(/\s+/);
+    if (words.length < 1 || words.length > 5) return false;
+    return /^[A-Za-z][A-Za-z\s.'-]{1,}$/.test(t);
+  };
+
+  // If first non-empty line is preamble OR doesn't look like a name, scan ahead.
+  let startIdx = 0;
+  while (startIdx < lines.length && lines[startIdx].trim() === '') startIdx++;
+  if (startIdx < lines.length && (isPreamble(lines[startIdx]) || !looksLikeName(lines[startIdx]))) {
+    // Find first name-like line
+    for (let i = startIdx + 1; i < lines.length; i++) {
+      if (looksLikeName(lines[i])) {
+        return lines.slice(i).join('\n').trim();
+      }
+    }
+  }
+  return content.trim();
+}
+
 export async function POST() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -66,6 +104,10 @@ export async function POST() {
     console.error('Resume generation failed', err);
     return NextResponse.json({ error: `AI generation failed: ${detail}` }, { status: 500 });
   }
+
+  // Defensive strip: if Claude prepended any explanatory prose (e.g. "I need to flag..." or "---"),
+  // find the actual start of the resume (the candidate's name on its own line).
+  content = stripPreamble(content);
 
   // Save as new version
   const { data: existing } = await supabase

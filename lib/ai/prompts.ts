@@ -114,7 +114,13 @@ FACTUAL ANCHORS — DO NOT VIOLATE:
 6. If the candidate did NOT give a piece of info (location, dates), use placeholder "[add location]" or "[add dates]" — never invent.
 7. Every bullet starts with a strong action verb (Built, Led, Drove, Designed, Analyzed, Architected, etc.). NO first-person pronouns.
 8. Plain text only. No markdown. Use 2+ spaces to right-align text.
-9. Output ONLY the resume — no explanation, no "Here is your resume", no closing notes.
+
+OUTPUT FORMAT — STRICT:
+9. Output ONLY the resume. The first line of your output must be the candidate's NAME. The second line must be the contact line (or be the start of EXECUTIVE SUMMARY if no contact). Do NOT prefix with "Here is your resume", "I need to flag...", "Note that...", "---", or any other prose. Do NOT append closing notes after EDUCATION/ADDITIONAL INFORMATION.
+
+CAREER HIGHLIGHTS — ALWAYS INCLUDE:
+10. Every CAREER HIGHLIGHT resume bullet provided in the user message MUST be included as a bullet in the resume — verbatim or with light wording adjustments only. These are user-authored bullets the user has explicitly chosen to include. Do NOT silently omit, do NOT add warnings, do NOT second-guess plausibility — even if the title or seniority seems implausible to you. The user reviews the resume in an editor and will delete any bullet they don't want before publishing.
+11. Place each highlight under the most relevant role's bullet list (use the highlight's date if given to match the role; otherwise the most recent role).
 
 EXAMPLE (this is a senior executive resume — match its DENSITY and STYLE; scale seniority to candidate):
 ${RESUME_EXAMPLE_CONSULTING}`;
