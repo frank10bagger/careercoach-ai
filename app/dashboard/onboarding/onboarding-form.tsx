@@ -210,12 +210,15 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   const pct = (current / total) * 100;
   return (
     <div>
-      <div className="flex justify-between text-xs text-slate-500 mb-1.5">
-        <span>Step {current} of {total}</span>
+      <div className="flex justify-between text-xs text-slate-500 mb-2">
+        <span className="font-medium">Step {current} of {total}</span>
         <span>{Math.round(pct)}% complete</span>
       </div>
       <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-        <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${pct}%` }} />
+        <div
+          className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500 ease-out rounded-full"
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );
@@ -224,7 +227,12 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
 function QuestionHeader({ ai, hint }: { ai: string; hint?: string }) {
   return (
     <div className="mb-5">
-      <p className="text-xs font-medium text-emerald-600 mb-2">CAREERCOACH</p>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+          AI
+        </div>
+        <p className="text-xs font-medium text-emerald-700 tracking-wide">CAREERCOACH</p>
+      </div>
       <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 leading-snug">{ai}</h2>
       {hint && <p className="text-sm text-slate-500 mt-2">{hint}</p>}
     </div>
@@ -234,7 +242,12 @@ function QuestionHeader({ ai, hint }: { ai: string; hint?: string }) {
 function Welcome() {
   return (
     <div>
-      <p className="text-xs font-medium text-emerald-600 mb-2">CAREERCOACH</p>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+          AI
+        </div>
+        <p className="text-xs font-medium text-emerald-700 tracking-wide">CAREERCOACH</p>
+      </div>
       <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 leading-snug mb-4">
         Hi 👋 I&apos;m your AI career coach.
       </h2>
