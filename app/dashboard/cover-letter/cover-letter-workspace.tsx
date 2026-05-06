@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { GenerateSkeleton } from '../skeleton';
 
 type Application = {
   id: string;
@@ -110,6 +111,10 @@ export default function CoverLetterWorkspace({
           {generating ? 'Drafting your letter...' : 'Generate cover letter'}
         </button>
       </form>
+
+      {generating && !output && (
+        <GenerateSkeleton rows={10} label="Drafting your cover letter..." />
+      )}
 
       {output && (
         <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-4">

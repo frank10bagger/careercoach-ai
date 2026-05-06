@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { GenerateSkeleton } from '../skeleton';
 
 type Highlight = {
   id: string;
@@ -99,6 +100,10 @@ export default function HighlightsWorkspace({ highlights }: { highlights: Highli
           {generating ? 'Polishing your story...' : '✨ Generate LinkedIn post + resume bullet'}
         </button>
       </form>
+
+      {generating && !generated && (
+        <GenerateSkeleton rows={8} label="Polishing your story..." />
+      )}
 
       {generated && (
         <div className="space-y-4">

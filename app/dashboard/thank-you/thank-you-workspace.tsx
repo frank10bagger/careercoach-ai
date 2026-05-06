@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { GenerateSkeleton } from '../skeleton';
 
 type Chat = {
   id: string;
@@ -125,6 +126,10 @@ export default function ThankYouWorkspace({ chats }: { chats: Chat[] }) {
           {generating ? 'Drafting...' : 'Draft thank-you email'}
         </button>
       </form>
+
+      {generating && !output && (
+        <GenerateSkeleton rows={8} label="Drafting your thank-you email..." />
+      )}
 
       {output && (
         <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-4">

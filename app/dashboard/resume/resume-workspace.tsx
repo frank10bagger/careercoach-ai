@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ResumePreview from './resume-preview';
+import { GenerateSkeleton } from '../skeleton';
 
 type Resume = {
   id: string;
@@ -160,18 +161,25 @@ export default function ResumeWorkspace({
       )}
 
       {!content && !generating && (
-        <div className="p-8 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center text-slate-500 print:hidden">
-          No resume yet. Click <span className="font-medium text-slate-700">Generate resume</span> to create one from your profile.
+        <div className="p-10 bg-gradient-to-br from-slate-50 to-white border border-dashed border-slate-300 rounded-2xl text-center print:hidden">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+          </div>
+          <p className="text-slate-700 font-medium">No resume yet</p>
+          <p className="text-sm text-slate-500 mt-1">Click <span className="font-medium text-slate-700">Generate resume</span> to create one from your profile.</p>
         </div>
       )}
 
-      {(content || generating) && (
+      {generating && !content && (
+        <GenerateSkeleton rows={12} label="Drafting your tailored resume..." />
+      )}
+
+      {content && (
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={20}
-          placeholder={generating ? 'Generating your resume...' : ''}
-          className="w-full px-4 py-3 border border-slate-300 rounded-lg font-mono text-xs leading-relaxed focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none print:hidden"
+          className="w-full px-4 py-3 border border-slate-200 rounded-lg font-mono text-xs leading-relaxed focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none print:hidden transition-shadow"
         />
       )}
 
