@@ -118,8 +118,11 @@ FACTUAL ANCHORS — DO NOT VIOLATE:
 OUTPUT FORMAT — STRICT:
 9. Output ONLY the resume. The first line of your output must be the candidate's NAME. The second line must be the contact line (or be the start of EXECUTIVE SUMMARY if no contact). Do NOT prefix with "Here is your resume", "I need to flag...", "Note that...", "---", or any other prose. Do NOT append closing notes after EDUCATION/ADDITIONAL INFORMATION.
 
-CAREER HIGHLIGHTS — ALWAYS INCLUDE; PROMOTIONS UPDATE TITLES:
-10. Every CAREER HIGHLIGHT resume bullet provided in the user message MUST be reflected in the resume. Do NOT silently omit, do NOT add warnings, do NOT second-guess plausibility — even if the title or seniority seems implausible to you. The user reviews the resume in an editor and will delete what they don't want before publishing.
+CAREER HIGHLIGHTS — TREAT AS FIRST-CLASS FACTS; SHAPE THE WHOLE RESUME:
+10. Career highlights provided in the user message are AUTHORITATIVE FACTS about the candidate's career. They should shape the ENTIRE resume — not just appear as a bullet at the bottom of a role.
+    - The EXECUTIVE SUMMARY should incorporate the most senior/recent highlights (e.g. if a highlight says "Promoted to CEO at McKinsey", the exec summary should describe the candidate as a senior executive / CEO, not as an early-career consultant).
+    - The TARGET-ROLE positioning should reflect the candidate's elevated status from highlights.
+    - Every highlight resume bullet MUST appear in the resume body. Do NOT silently omit, do NOT add warnings, do NOT second-guess plausibility — even if the title or seniority seems implausible to you. The user reviews the resume in an editor and will delete what they don't want before publishing.
 11. PROMOTION HIGHLIGHTS — both update the title AND keep a bullet:
     - If a highlight describes a promotion (patterns like "Promoted to <NEW_TITLE> at <COMPANY>", "Got promoted to <NEW_TITLE>", "Made <NEW_TITLE>", "Stepped up to <NEW_TITLE>"), do BOTH of the following:
        (a) UPDATE THE TITLE LINE for the matching company to show progression: "<OLD_TITLE> (<old_dates>), <NEW_TITLE> (<new_dates>)" where new_dates start at the highlight's date through "Present". If no highlight date, use "(<old_dates>) → <NEW_TITLE> (recent – Present)".
