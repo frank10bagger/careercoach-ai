@@ -46,7 +46,15 @@ type Profile = {
 
 const TOTAL_STEPS = 8;
 
-export default function OnboardingForm({ initial }: { initial: Profile }) {
+export default function OnboardingForm({
+  initial,
+  initialExperiences = [],
+  initialEducations = [],
+}: {
+  initial: Profile;
+  initialExperiences?: Experience[];
+  initialEducations?: Education[];
+}) {
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,8 +69,8 @@ export default function OnboardingForm({ initial }: { initial: Profile }) {
   const [targetIndustry, setTargetIndustry] = useState(initial.target_industry || '');
   const [careerGap, setCareerGap] = useState(initial.career_gap || '');
 
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [educations, setEducations] = useState<Education[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>(initialExperiences);
+  const [educations, setEducations] = useState<Education[]>(initialEducations);
 
   const [cheer, setCheer] = useState<string | null>(null);
 
